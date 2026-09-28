@@ -301,6 +301,7 @@ const CATS = [
   {id:"reactcode", name:"React & Next.js Coding", sub:"Build-it-live tasks: hooks, forms, lists, modals, auth middleware."},
   {id:"next", name:"Next.js", sub:"App Router, Server Components, rendering strategies, caching, Server Actions, middleware."},
   {id:"python", name:"Python", sub:"Language internals and idioms that interviewers probe."},
+  {id:"pybasic", name:"Python Basics Coding", sub:"Simple Python programs asked in first rounds and online tests: numbers, strings, lists, dicts, loops, patterns, files, basic classes."},
   {id:"pycore", name:"Python Coding", sub:"Python coding round: predict-the-output traps, lists and dicts, OOP, iterators and generators, decorators, concurrency, file handling, sorting, testing."},
   {id:"pyweb", name:"Python Backend (FastAPI / Django)", sub:"API design and framework questions for the backend half of the role."},
   {id:"pycode", name:"Backend Coding (Python / SQL)", sub:"Write the endpoint: auth, password reset, rate limiting, async, SQL queries."},
@@ -1023,6 +1024,292 @@ async def upload_url(name: str, user=Depends(current_user)):
                             expiry=expiry)
     return {"url": f"{settings.blob_url}/uploads/{blob}?{sas}"}
 # Browser: PUT file to that url with header x-ms-blob-type: BlockBlob</code></pre><p>The API never streams the file itself, so it stays fast; managed identity means no storage key in code.</p>`],
+
+// ---------- PYTHON BASICS (simple coding) ----------
+["pybasic","Junior","Check if a number is even or odd; positive, negative or zero.",`<pre><code>n = int(input("Enter a number: "))
+print("Even" if n % 2 == 0 else "Odd")
+
+if n > 0: print("Positive")
+elif n &lt; 0: print("Negative")
+else: print("Zero")</code></pre>`],
+["pybasic","Junior","Find the largest of three numbers (with and without <code>max()</code>).",`<pre><code>def largest(a, b, c):
+    if a >= b and a >= c: return a
+    elif b >= c: return b
+    return c
+
+max(a, b, c)   # built-in</code></pre>`],
+["pybasic","Junior","Check whether a year is a leap year.",`<pre><code>def is_leap(y):
+    return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)
+
+is_leap(2024), is_leap(1900), is_leap(2000)   # True, False, True</code></pre>`],
+["pybasic","Junior","Print the multiplication table of a number.",`<pre><code>n = 7
+for i in range(1, 11):
+    print(f"{n} x {i} = {n * i}")</code></pre>`],
+["pybasic","Junior","Sum of the first N natural numbers (loop and formula).",`<pre><code>def sum_n(n):
+    total = 0
+    for i in range(1, n + 1): total += i
+    return total
+
+def sum_n_formula(n): return n * (n + 1) // 2
+sum(range(1, n + 1))        # built-in</code></pre>`],
+["pybasic","Junior","FizzBuzz.",`<pre><code>for i in range(1, 101):
+    if i % 15 == 0: print("FizzBuzz")
+    elif i % 3 == 0: print("Fizz")
+    elif i % 5 == 0: print("Buzz")
+    else: print(i)</code></pre><p>Check 15 first, otherwise multiples of 15 print "Fizz".</p>`],
+["pybasic","Junior","Factorial of a number (loop, recursion, <code>math</code>).",`<pre><code>def fact(n):
+    result = 1
+    for i in range(2, n + 1): result *= i
+    return result
+
+def fact_rec(n): return 1 if n &lt;= 1 else n * fact_rec(n - 1)
+
+import math; math.factorial(5)   # 120</code></pre>`],
+["pybasic","Junior","Check if a number is prime; print all primes up to N.",`<pre><code>def is_prime(n):
+    if n &lt; 2: return False
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0: return False
+    return True
+
+[x for x in range(2, 51) if is_prime(x)]
+
+def sieve(n):                       # faster for many numbers
+    is_p = [True] * (n + 1); is_p[0:2] = [False, False]
+    for i in range(2, int(n ** 0.5) + 1):
+        if is_p[i]:
+            for j in range(i * i, n + 1, i): is_p[j] = False
+    return [i for i, p in enumerate(is_p) if p]</code></pre>`],
+["pybasic","Junior","Print the first N Fibonacci numbers.",`<pre><code>def fib(n):
+    a, b = 0, 1
+    for _ in range(n):
+        print(a, end=" ")
+        a, b = b, a + b
+fib(10)   # 0 1 1 2 3 5 8 13 21 34</code></pre>`],
+["pybasic","Junior","Check if a number is a palindrome (e.g. 121).",`<pre><code>def is_num_palindrome(n):
+    return str(n) == str(n)[::-1]
+
+def is_num_palindrome_math(n):      # without converting to string
+    original, rev = n, 0
+    while n > 0:
+        rev = rev * 10 + n % 10
+        n //= 10
+    return original == rev</code></pre>`],
+["pybasic","Junior","Count digits in a number; sum and product of digits.",`<pre><code>n = 12345
+len(str(n))                          # 5 digits
+sum(int(d) for d in str(n))          # 15
+
+count = 0; total = 0
+while n > 0:
+    total += n % 10; n //= 10; count += 1</code></pre>`],
+["pybasic","Junior","Convert Celsius to Fahrenheit and decimal to binary.",`<pre><code>f = c * 9 / 5 + 32
+c = (f - 32) * 5 / 9
+
+bin(10)          # '0b1010'
+format(10, "b")  # '1010'
+int("1010", 2)   # 10
+
+def to_binary(n):           # by hand
+    bits = ""
+    while n > 0:
+        bits = str(n % 2) + bits; n //= 2
+    return bits or "0"</code></pre>`],
+["pybasic","Junior","Reverse a string, a list and a sentence's word order.",`<pre><code>"hello"[::-1]                     # 'olleh'
+"".join(reversed("hello"))
+
+nums = [1, 2, 3]
+nums[::-1]            # new list
+nums.reverse()        # in place
+
+" ".join("I love Python".split()[::-1])   # 'Python love I'
+" ".join(w[::-1] for w in "I love Python".split())   # 'I evol nohtyP'</code></pre>`],
+["pybasic","Junior","Count vowels, consonants, digits and spaces in a string.",`<pre><code>def counts(s):
+    v = c = d = sp = 0
+    for ch in s.lower():
+        if ch in "aeiou": v += 1
+        elif ch.isalpha(): c += 1
+        elif ch.isdigit(): d += 1
+        elif ch == " ": sp += 1
+    return v, c, d, sp
+
+counts("Hello World 2026")   # (3, 7, 4, 2)</code></pre>`],
+["pybasic","Junior","Count how many times each character appears in a string.",`<pre><code>s = "programming"
+freq = {}
+for ch in s:
+    freq[ch] = freq.get(ch, 0) + 1
+print(freq)   # {'p': 1, 'r': 2, 'o': 1, 'g': 2, 'a': 1, 'm': 2, 'i': 1, 'n': 1}
+
+from collections import Counter
+Counter(s)</code></pre>`],
+["pybasic","Junior","Remove vowels, spaces, punctuation or duplicate characters from a string.",`<pre><code>s = "Hello, World!"
+"".join(ch for ch in s if ch.lower() not in "aeiou")   # 'Hll, Wrld!'
+s.replace(" ", "")                                      # remove spaces
+import string
+s.translate(str.maketrans("", "", string.punctuation))  # 'Hello World'
+"".join(dict.fromkeys("banana"))                        # 'ban'  (keeps order)</code></pre>`],
+["pybasic","Junior","Common string methods: capitalize, title, swap case, count words, check startswith.",`<pre><code>s = "hello world python"
+s.upper(), s.title(), s.capitalize(), s.swapcase()
+len(s.split())                 # 3 words
+s.startswith("hello"), s.endswith("on")
+s.find("world")                # 6 (-1 if missing), s.index() raises
+s.count("o")                   # 3
+"-".join(["a", "b"])           # 'a-b'
+"  hi  ".strip()               # 'hi'
+"abc".isalpha(), "123".isdigit()</code></pre>`],
+["pybasic","Junior","Find the longest word in a sentence.",`<pre><code>sentence = "Python is an amazing language"
+max(sentence.split(), key=len)   # 'language'</code></pre>`],
+["pybasic","Junior","Sum, average, max and min of a list without built-ins.",`<pre><code>nums = [4, 9, 2, 7]
+total = 0; biggest = smallest = nums[0]
+for x in nums:
+    total += x
+    if x > biggest: biggest = x
+    if x &lt; smallest: smallest = x
+avg = total / len(nums)
+
+sum(nums), max(nums), min(nums), sum(nums) / len(nums)   # built-ins</code></pre>`],
+["pybasic","Junior","Find the second largest / second smallest number in a list.",`<pre><code>nums = [10, 20, 4, 45, 99, 99]
+sorted(set(nums))[-2]    # 45  (set removes duplicates)
+sorted(set(nums))[1]     # 10  second smallest</code></pre><p>Follow-up: do it in one pass without sorting (see "largest and second largest" in DSA).</p>`],
+["pybasic","Junior","Separate even and odd numbers; square every element.",`<pre><code>nums = [1, 2, 3, 4, 5, 6]
+evens = [x for x in nums if x % 2 == 0]
+odds  = [x for x in nums if x % 2 != 0]
+squares = [x ** 2 for x in nums]
+list(map(lambda x: x ** 2, nums))</code></pre>`],
+["pybasic","Junior","Common elements of two lists; elements in one but not the other.",`<pre><code>a = [1, 2, 3, 4]; b = [3, 4, 5]
+list(set(a) & set(b))    # [3, 4]  intersection
+list(set(a) - set(b))    # [1, 2]  difference
+list(set(a) | set(b))    # union
+list(set(a) ^ set(b))    # [1, 2, 5]  symmetric difference
+[x for x in a if x in b] # keeps order</code></pre>`],
+["pybasic","Junior","Remove duplicates from a list (keeping order).",`<pre><code>nums = [3, 1, 3, 2, 1]
+list(set(nums))             # order not guaranteed
+list(dict.fromkeys(nums))   # [3, 1, 2]
+
+result = []
+for x in nums:
+    if x not in result: result.append(x)</code></pre>`],
+["pybasic","Junior","Create a dict from two lists; count list items; find a key by value.",`<pre><code>keys = ["name", "age"]; vals = ["Ana", 25]
+d = dict(zip(keys, vals))           # {'name': 'Ana', 'age': 25}
+
+fruits = ["apple", "kiwi", "apple"]
+{f: fruits.count(f) for f in set(fruits)}
+
+[k for k, v in d.items() if v == 25]   # ['age']
+d.get("city", "unknown")               # safe lookup</code></pre>`],
+["pybasic","Junior","Linear search: find the index of an element.",`<pre><code>def linear_search(arr, target):
+    for i, x in enumerate(arr):
+        if x == target: return i
+    return -1
+
+[5, 3, 8].index(8)   # 2  (raises ValueError if missing)</code></pre>`],
+["pybasic","Junior","Print star patterns: right triangle, pyramid, number triangle.",`<pre><code>n = 4
+for i in range(1, n + 1):          # *  **  ***  ****
+    print("*" * i)
+
+for i in range(1, n + 1):          # centered pyramid
+    print(" " * (n - i) + "*" * (2 * i - 1))
+
+for i in range(1, n + 1):          # 1 / 1 2 / 1 2 3 ...
+    print(*range(1, i + 1))</code></pre>`],
+["pybasic","Junior","Simple calculator using functions (and handling divide by zero).",`<pre><code>def calc(a, op, b):
+    if op == "+": return a + b
+    if op == "-": return a - b
+    if op == "*": return a * b
+    if op == "/":
+        if b == 0: return "Cannot divide by zero"
+        return a / b
+    return "Unknown operator"
+
+# Python 3.10+ match statement
+def calc2(a, op, b):
+    match op:
+        case "+": return a + b
+        case "-": return a - b
+        case _: return "Unknown operator"</code></pre>`],
+["pybasic","Junior","Take user input safely: keep asking until a valid integer is entered.",`<pre><code>while True:
+    raw = input("Age: ")
+    try:
+        age = int(raw)
+        break
+    except ValueError:
+        print("Please enter a whole number.")</code></pre>`],
+["pybasic","Junior","Read a file and count lines, words and characters; write to a file.",`<pre><code>with open("notes.txt", encoding="utf-8") as f:
+    text = f.read()
+lines, words, chars = text.count("\\n") + 1, len(text.split()), len(text)
+
+with open("out.txt", "w", encoding="utf-8") as f:
+    f.write("Hello\\n")
+with open("out.txt", "a") as f:     # append mode
+    f.write("More\\n")</code></pre>`],
+["pybasic","Junior","<code>break</code>, <code>continue</code>, <code>pass</code> and <code>for…else</code>.",`<pre><code>for x in range(10):
+    if x == 3: continue    # skip 3
+    if x == 6: break       # stop the loop
+    print(x)               # 0 1 2 4 5
+
+def todo(): pass           # placeholder, does nothing
+
+for x in [1, 3, 5]:
+    if x % 2 == 0: print("found even"); break
+else:
+    print("no even number")    # runs only if loop didn't break</code></pre>`],
+["pybasic","Junior","Slicing: first/last N items, every second item, copy a list.",`<pre><code>a = [0, 1, 2, 3, 4, 5]
+a[:3]      # [0, 1, 2]
+a[-2:]     # [4, 5]
+a[::2]     # [0, 2, 4]
+a[1:5:2]   # [1, 3]
+a[:]       # shallow copy
+"python"[1:4]   # 'yth'</code></pre>`],
+["pybasic","Junior","Functions: default args, keyword args, <code>*args</code>, returning multiple values, lambda.",`<pre><code>def greet(name, greeting="Hello"):
+    return f"{greeting}, {name}!"
+greet("Ana"), greet(greeting="Hi", name="Bo")
+
+def total(*nums): return sum(nums)
+total(1, 2, 3)                # 6
+
+def min_max(xs): return min(xs), max(xs)
+lo, hi = min_max([3, 1, 9])   # returns a tuple
+
+square = lambda x: x * x</code></pre>`],
+["pybasic","Junior","Simple class: a BankAccount with deposit, withdraw and balance.",`<pre><code>class BankAccount:
+    def __init__(self, owner, balance=0):
+        self.owner = owner
+        self.balance = balance
+
+    def deposit(self, amount):
+        if amount &lt;= 0: raise ValueError("Deposit must be positive")
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if amount > self.balance: raise ValueError("Insufficient funds")
+        self.balance -= amount
+
+    def __str__(self): return f"{self.owner}: {self.balance}"
+
+acc = BankAccount("Ana"); acc.deposit(500); acc.withdraw(200); print(acc)  # Ana: 300</code></pre>`],
+["pybasic","Junior","Inheritance: Animal → Dog/Cat with method overriding and <code>super()</code>.",`<pre><code>class Animal:
+    def __init__(self, name): self.name = name
+    def speak(self): return "..."
+
+class Dog(Animal):
+    def __init__(self, name, breed):
+        super().__init__(name); self.breed = breed
+    def speak(self): return f"{self.name} says Woof"
+
+class Cat(Animal):
+    def speak(self): return f"{self.name} says Meow"
+
+for a in [Dog("Rex", "Lab"), Cat("Tom")]: print(a.speak())</code></pre>`],
+["pybasic","Junior","Bubble sort and selection sort by hand.",`<pre><code>def bubble(a):
+    n = len(a)
+    for i in range(n):
+        for j in range(n - 1 - i):
+            if a[j] > a[j + 1]: a[j], a[j + 1] = a[j + 1], a[j]
+    return a
+
+def selection(a):
+    for i in range(len(a)):
+        m = min(range(i, len(a)), key=a.__getitem__)
+        a[i], a[m] = a[m], a[i]
+    return a</code></pre>`],
 
 // ---------- PYTHON CODING (core) ----------
 ["pycore","Mid","Predict the output: mutable default, late-binding lambdas, list aliasing.",`<pre><code>def f(x, acc=[]):
@@ -2024,7 +2311,7 @@ window.addEventListener("beforeprint", () => document.querySelectorAll("details.
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
 <script>
 mermaid.initialize({ startOnLoad: false, theme: (location.hash !== "#print" && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "default" });
-mermaid.run({ querySelector: "pre.mermaid" }).then(() => document.body.dataset.ready = "1");
+mermaid.run({ querySelector: "pre.mermaid" });
 </script>
 </body>
 </html>
