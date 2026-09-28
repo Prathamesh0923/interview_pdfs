@@ -1,0 +1,2030 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Full Stack Interview Bank</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --surface-2:#e9edf3; --ink:#18223a; --muted:#5b6780;
+  --line:#d5dbe5; --accent:#2c56c9; --accent-soft:#e2e9fb; --known:#1f8a5b; --known-soft:#dcf1e6;
+  --jr:#1f8a5b; --mid:#b7791f; --sr:#b8403a; --code-bg:#eef1f6;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0f1420; --surface:#171e2e; --surface-2:#1f2839; --ink:#e3e8f2; --muted:#98a3ba;
+    --line:#2b364b; --accent:#7d9cf5; --accent-soft:#1f2c4d; --known:#4cc28d; --known-soft:#15382a;
+    --jr:#4cc28d; --mid:#e3aa4f; --sr:#ef7d75; --code-bg:#111827;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f1420; --surface:#171e2e; --surface-2:#1f2839; --ink:#e3e8f2; --muted:#98a3ba;
+  --line:#2b364b; --accent:#7d9cf5; --accent-soft:#1f2c4d; --known:#4cc28d; --known-soft:#15382a;
+  --jr:#4cc28d; --mid:#e3aa4f; --sr:#ef7d75; --code-bg:#111827;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:0 48px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top{padding-block:28px 18px;display:grid;gap:10px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4.2vw,42px);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.lede{color:var(--muted);max-width:68ch;margin:0}
+.stats{display:flex;flex-wrap:wrap;gap:18px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.stats b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;max-width:420px}
+.bar span{display:block;height:100%;background:var(--known);width:0;transition:width .3s}
+
+.toolbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.search{flex:1 1 260px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:0 12px}
+.search input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;padding:10px 0;outline:none}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.chip{font:500 13px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,button:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{font:500 13px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+
+.layout{display:grid;grid-template-columns:240px 1fr;gap:28px;padding-top:20px}
+nav.cats{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);align-self:start;display:grid;gap:2px}
+.cat{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;text-align:left;width:100%;background:transparent;border:0;border-radius:6px;padding:8px 10px;color:var(--ink);font:500 14px var(--body);cursor:pointer}
+.cat:hover{background:var(--surface-2)}
+.cat[aria-current="true"]{background:var(--accent-soft);color:var(--accent)}
+.cat .n{font:12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.cat .mini{grid-column:1/-1;height:3px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.cat .mini span{display:block;height:100%;background:var(--known)}
+
+main{min-width:0;display:grid;gap:28px}
+.section h2{font-family:var(--display);font-weight:700;font-size:22px;margin:0 0 4px;letter-spacing:-.005em}
+.section .sub{color:var(--muted);margin:0 0 12px;font-size:14px;max-width:70ch}
+.qlist{display:grid;gap:8px}
+details.q{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+details.q[open]{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+details.q.known{border-left:3px solid var(--known)}
+summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:12px 14px}
+summary::-webkit-details-marker{display:none}
+.qn{font:12px var(--mono);color:var(--muted);padding-top:3px;font-variant-numeric:tabular-nums;min-width:3ch}
+.qt{font-weight:600;font-size:15px}
+.lvl{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:4px;border:1px solid currentColor;white-space:nowrap}
+.lvl.Junior{color:var(--jr)} .lvl.Mid{color:var(--mid)} .lvl.Senior{color:var(--sr)}
+.ans{padding:0 14px 14px 50px;display:grid;gap:10px}
+.ans p,.ans ul,.ans ol{margin:0;max-width:75ch}
+.ans ul,.ans ol{padding-left:20px}
+.ans li{margin:2px 0}
+code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{margin:0;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;font:13px/1.5 var(--mono)}
+pre code{background:none;padding:0;font-size:inherit}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap}
+.mark{font:500 12px var(--body);border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:6px;padding:5px 10px;cursor:pointer}
+.known .mark{background:var(--known-soft);color:var(--known);border-color:var(--known)}
+.tip{font-size:13.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+.tip b{color:var(--ink)}
+.empty{color:var(--muted);padding:30px 0;text-align:center}
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;margin-bottom:10px}
+.diagram h3{margin:0 0 6px;font:600 14px var(--body)}
+.sources{font-size:13.5px;color:var(--muted)}
+.sources ul{padding-left:18px;margin:6px 0 0;columns:2 280px;column-gap:28px}
+.sources a{color:var(--accent)}
+.practice{background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:18px;display:grid;gap:12px}
+.practice .pq{font-family:var(--display);font-size:20px;font-weight:500;text-wrap:balance}
+@media (max-width:820px){
+  .layout{grid-template-columns:1fr}
+  nav.cats{position:static;display:flex;overflow-x:auto;gap:6px;padding-bottom:4px}
+  .cat{grid-template-columns:auto auto;white-space:nowrap;border:1px solid var(--line);background:var(--surface)}
+  .cat .mini{display:none}
+  .ans{padding-left:14px}
+  summary{grid-template-columns:1fr auto}
+  .qn{display:none}
+}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt;padding-inline:0}
+  .toolbar,nav.cats,#practice,.row-actions,.bar{display:none!important}
+  .layout{display:block;padding-top:0}
+  details.q{break-inside:avoid;border-color:#ccc}
+  details.q.known{border-left:1px solid #ccc}
+  pre{white-space:pre-wrap;word-break:break-word;font-size:9pt}
+  .ans{padding-left:14px}
+  .section h2{break-after:avoid}
+  .diagram{break-inside:avoid}
+  a{color:inherit}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Question bank · Python · React · Next.js · HTML/CSS · Azure · Auth architecture</div>
+    <h1>Full Stack Interview Bank</h1>
+    <p class="lede">The questions that come up most often in full stack interviews, gathered from published 2026 interview guides and grouped by topic. Each one has a short model answer. Search, filter by level, mark what you know, or run a random practice round.</p>
+    <div class="stats"><span><b id="st-total">0</b> questions</span><span><b id="st-known">0</b> marked known</span><span><b id="st-shown">0</b> shown</span></div>
+    <div class="bar" aria-hidden="true"><span id="st-bar"></span></div>
+  </header>
+
+  <div class="toolbar" role="search">
+    <label class="search" for="q-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q-search" type="search" placeholder="Search questions and answers, e.g. JWT, useEffect, GIL" autocomplete="off">
+    </label>
+    <button class="chip" data-lvl="all" aria-pressed="true">All levels</button>
+    <button class="chip" data-lvl="Junior" aria-pressed="false">Junior</button>
+    <button class="chip" data-lvl="Mid" aria-pressed="false">Mid</button>
+    <button class="chip" data-lvl="Senior" aria-pressed="false">Senior</button>
+    <button class="chip" id="hide-known" aria-pressed="false">Hide known</button>
+    <button class="btn" id="practice-btn">Practice round</button>
+    <button class="btn" id="expand-btn">Expand all</button>
+  </div>
+
+  <div class="layout">
+    <nav class="cats" id="cats" aria-label="Topics"></nav>
+    <main id="main">
+      <section class="practice" id="practice" hidden>
+        <div class="eyebrow" id="p-meta"></div>
+        <div class="pq" id="p-q"></div>
+        <div class="ans" id="p-a" hidden style="padding:0"></div>
+        <div class="row-actions">
+          <button class="btn" id="p-show">Show answer</button>
+          <button class="btn" id="p-know">I know this</button>
+          <button class="btn" id="p-next">Next question</button>
+          <button class="btn" id="p-close">Close</button>
+        </div>
+      </section>
+      <div id="sections"></div>
+
+      <section class="section" id="diagrams">
+        <h2>Architecture diagrams</h2>
+        <p class="sub">Interviewers often ask you to draw these on a whiteboard. Practise explaining each arrow.</p>
+<div class="diagram"><h3>Signup and email verification</h3>
+<pre class="mermaid">
+sequenceDiagram
+  participant U as User
+  participant W as Next.js
+  participant A as API (FastAPI)
+  participant D as Database
+  participant Q as Queue / Email
+  U->>W: Submit email + password
+  W->>A: POST /auth/signup
+  A->>D: Create user (Argon2 hash, verified=false)
+  A->>D: Store hash(token), expires 24h
+  A->>Q: Send verification link
+  A-->>W: 202 "Check your inbox"
+  U->>A: GET /verify?token=...
+  A->>D: Find hash(token), check expiry
+  A->>D: verified=true, delete token
+  A-->>U: Redirect to login
+</pre></div>
+<div class="diagram"><h3>Login with access and refresh tokens</h3>
+<pre class="mermaid">
+sequenceDiagram
+  participant B as Browser
+  participant A as API
+  participant R as Redis / DB
+  B->>A: POST /auth/login
+  A->>R: Rate limit check
+  A->>R: Load user, verify hash, check MFA
+  A->>R: Save refresh token (hashed, family id)
+  A-->>B: Access token (15 min) + refresh cookie (HttpOnly)
+  B->>A: API call with access token
+  A-->>B: 200
+  B->>A: POST /auth/refresh (cookie)
+  A->>R: Rotate: invalidate old, store new
+  A-->>B: New access token + new refresh cookie
+</pre></div>
+<div class="diagram"><h3>Forgot and reset password</h3>
+<pre class="mermaid">
+flowchart LR
+  F[Forgot password form] --> R{Rate limit ok?}
+  R -- no --> X[429]
+  R -- yes --> G[Same reply for every email]
+  G --> T[Store hash of random token, 30 min expiry]
+  T --> E[Email reset link]
+  E --> P[Reset page, no-referrer]
+  P --> V{Token valid, unused, not expired?}
+  V -- no --> I[Show error and request a new link]
+  V -- yes --> S[Save new Argon2 hash]
+  S --> K[Delete tokens and revoke all sessions]
+  K --> N[Send password changed email]
+</pre></div>
+<div class="diagram"><h3>Next.js App Router request flow</h3>
+<pre class="mermaid">
+flowchart LR
+  B[Browser request] --> M[middleware.ts: redirects, auth cookie check]
+  M --> L[Root layout: Server Component]
+  L --> P[page.tsx: async Server Component]
+  P --> D[(DB / FastAPI)]
+  P --> C[Client Components: 'use client']
+  L --> S[Stream HTML + RSC payload]
+  S --> H[Browser hydrates client components]
+  H --> A[Server Action on form submit]
+  A --> R[revalidatePath / revalidateTag]
+</pre></div>
+<div class="diagram"><h3>JavaScript event loop</h3>
+<pre class="mermaid">
+flowchart LR
+  CS[Call stack runs sync code] --> E{Stack empty?}
+  E -- yes --> MQ[Drain ALL microtasks: Promise.then, await, queueMicrotask]
+  MQ --> RN[Render if needed]
+  RN --> TQ[Take ONE macrotask: setTimeout, I/O, click]
+  TQ --> CS
+</pre></div>
+<div class="diagram"><h3>Next.js + Python on Azure</h3>
+<pre class="mermaid">
+flowchart TB
+  U[Users] --> FD[Azure Front Door: CDN + WAF]
+  FD --> WEB[Next.js on App Service / Container Apps]
+  WEB --> API[FastAPI on Container Apps]
+  WEB --> EXT[Entra External ID: customer sign-in]
+  API --> PG[(Azure Database for PostgreSQL)]
+  API --> RC[(Azure Cache for Redis: sessions, rate limits)]
+  API --> BL[(Blob Storage: uploads via SAS)]
+  API --> SB[Service Bus queue]
+  SB --> FN[Azure Functions: emails, reports]
+  FN --> EM[Azure Communication Services Email]
+  API -. managed identity .-> KV[Key Vault]
+  WEB -. telemetry .-> AI[Application Insights]
+  API -. telemetry .-> AI
+</pre></div>
+<div class="diagram"><h3>CI/CD to Azure</h3>
+<pre class="mermaid">
+flowchart LR
+  PR[Pull request] --> CI[Lint, type check, tests]
+  CI --> BLD[Build Docker image]
+  BLD --> ACR[Push to Container Registry]
+  ACR --> STG[Deploy to staging slot]
+  STG --> SM[Smoke tests]
+  SM --> SW[Swap to production]
+  SW -. rollback .-> STG
+</pre></div>
+      </section>
+      <section class="sources section" id="sources">
+        <h2>Sources</h2>
+        <p class="sub">Questions were cross-checked against these published guides (September 2026). Answers are written fresh and kept short; go deeper on anything you get asked twice.</p>
+        <ul>
+          <li><a href="https://interviewkickstart.com/blogs/articles/full-stack-developer-interview-questions-and-answers" target="_blank" rel="noopener">Interview Kickstart: Full Stack Q&amp;A 2026</a></li>
+          <li><a href="https://www.kore1.com/full-stack-developer-interview-questions/" target="_blank" rel="noopener">KORE1: Full Stack Developer Interview Questions 2026</a></li>
+          <li><a href="https://www.nucamp.co/blog/top-30-full-stack-developer-interview-questions-in-2026-with-answers" target="_blank" rel="noopener">Nucamp: Top 30 Full Stack Questions 2026</a></li>
+          <li><a href="https://www.edureka.co/blog/interview-questions/full-stack-developer-interview-questions/" target="_blank" rel="noopener">Edureka: 40+ Full Stack Questions</a></li>
+          <li><a href="https://www.testmuai.com/learning-hub/full-stack-developer-interview-questions/" target="_blank" rel="noopener">TestMu: 100+ Full Stack Questions</a></li>
+          <li><a href="https://www.greatfrontend.com/blog/next-js-interview-questions" target="_blank" rel="noopener">GreatFrontEnd: Next.js Questions (Mid–Senior)</a></li>
+          <li><a href="https://www.greatfrontend.com/blog/next-js-interview-questions-for-freshers" target="_blank" rel="noopener">GreatFrontEnd: Next.js for Freshers</a></li>
+          <li><a href="https://www.interviewbit.com/next-js-interview-questions/" target="_blank" rel="noopener">InterviewBit: Next.js Questions</a></li>
+          <li><a href="https://www.datacamp.com/blog/azure-interview-questions" target="_blank" rel="noopener">DataCamp: 33 Azure Questions</a></li>
+          <li><a href="https://kodekloud.com/blog/azure-interview-questions/" target="_blank" rel="noopener">KodeKloud: Azure Questions 2026</a></li>
+          <li><a href="https://www.fullstack.cafe/blog/azure-interview-questions" target="_blank" rel="noopener">FullStack.Cafe: Azure Developer Questions</a></li>
+          <li><a href="https://tenant365admin.com/entra-interview-questions-and-answers/" target="_blank" rel="noopener">Tenant365Admin: Microsoft Entra Questions</a></li>
+          <li><a href="https://www.geeksforgeeks.org/system-design/designing-authentication-system-system-design/" target="_blank" rel="noopener">GeeksforGeeks: Designing an Authentication System</a></li>
+          <li><a href="https://chiraghasija.cc/posts/design-authentication-login-system-system-design/" target="_blank" rel="noopener">Chirag Hasija: Design a Login System</a></li>
+          <li><a href="https://www.freecodecamp.org/news/how-to-build-a-secure-authentication-system-with-jwt-and-refresh-tokens/" target="_blank" rel="noopener">freeCodeCamp: JWT and Refresh Tokens</a></li>
+          <li><a href="https://www.interviewcoder.co/blog/jwt-interview-questions" target="_blank" rel="noopener">Interview Coder: 35 JWT Questions</a></li>
+          <li><a href="https://dev.to/gabrielanhaia/design-a-multi-device-authentication-service-sessions-vs-jwt-vs-passkeys-5fc0" target="_blank" rel="noopener">DEV: Sessions vs JWT vs Passkeys</a></li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+const CATS = [
+  {id:"html", name:"HTML", sub:"Semantics, accessibility, forms, performance hints. Usually the warm-up round."},
+  {id:"css", name:"CSS", sub:"Layout (flex, grid), cascade and specificity, responsive design, modern features."},
+  {id:"js", name:"JavaScript & TypeScript", sub:"The language fundamentals every React and Next.js question sits on."},
+  {id:"jscode", name:"JS Coding & Output", sub:"Machine-round questions: predict the output, write polyfills and utilities by hand."},
+  {id:"react", name:"React", sub:"Rendering model, hooks, state, performance, patterns."},
+  {id:"reactcode", name:"React & Next.js Coding", sub:"Build-it-live tasks: hooks, forms, lists, modals, auth middleware."},
+  {id:"next", name:"Next.js", sub:"App Router, Server Components, rendering strategies, caching, Server Actions, middleware."},
+  {id:"python", name:"Python", sub:"Language internals and idioms that interviewers probe."},
+  {id:"pycore", name:"Python Coding", sub:"Python coding round: predict-the-output traps, lists and dicts, OOP, iterators and generators, decorators, concurrency, file handling, sorting, testing."},
+  {id:"pyweb", name:"Python Backend (FastAPI / Django)", sub:"API design and framework questions for the backend half of the role."},
+  {id:"pycode", name:"Backend Coding (Python / SQL)", sub:"Write the endpoint: auth, password reset, rate limiting, async, SQL queries."},
+  {id:"db", name:"Databases & APIs", sub:"SQL, indexing, transactions, REST vs GraphQL, caching."},
+  {id:"auth", name:"Auth Architecture", sub:"Signup, login, email verification, password reset, sessions vs JWT, OAuth, MFA. Frequently asked as a system design round."},
+  {id:"azure", name:"Azure", sub:"App Service, Functions, Entra ID, Key Vault, storage, DevOps."},
+  {id:"design", name:"System Design & DevOps", sub:"Scaling, caching, queues, CI/CD, observability."},
+  {id:"security", name:"Web Security", sub:"XSS, CSRF, CORS, SQL injection, headers."},
+  {id:"dsa", name:"DSA: Strings, Arrays, Lists", sub:"The data structures and algorithms problems asked most often in full stack rounds, with Python and JavaScript solutions and complexity."},
+  {id:"behav", name:"Behavioral & Scenario", sub:"Project stories and debugging scenarios. Answer with Situation, Task, Action, Result."}
+];
+
+// [category, level, question, answer(html)]
+const Q = [
+// ---------- HTML ----------
+["html","Junior","What is semantic HTML and why does it matter?",`<p>Using elements that describe meaning (<code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;button&gt;</code>) instead of generic <code>&lt;div&gt;</code>s.</p><ul><li>Screen readers use it to navigate by landmarks and headings.</li><li>Search engines understand page structure better.</li><li>Native elements bring keyboard and focus behaviour for free.</li></ul>`],
+["html","Junior","Difference between block, inline and inline-block elements?",`<ul><li><b>Block</b> (<code>div</code>, <code>p</code>): starts on a new line, takes full width, respects width/height.</li><li><b>Inline</b> (<code>span</code>, <code>a</code>): flows in text, ignores width/height and vertical margins.</li><li><b>Inline-block</b>: flows inline but respects width, height and padding.</li></ul>`],
+["html","Junior","What do <code>async</code> and <code>defer</code> do on a script tag?",`<ul><li>No attribute: HTML parsing stops while the script downloads and runs.</li><li><code>async</code>: downloads in parallel, runs as soon as it arrives; order not guaranteed. Good for analytics.</li><li><code>defer</code>: downloads in parallel, runs after parsing, in document order. Good for app scripts.</li></ul>`],
+["html","Junior","What is the purpose of the <code>&lt;!DOCTYPE html&gt;</code> and the viewport meta tag?",`<p>DOCTYPE puts the browser in standards mode instead of quirks mode. <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</code> tells mobile browsers to use the device width, so responsive CSS works.</p>`],
+["html","Mid","How do you make a form accessible?",`<ul><li>Every input has a <code>&lt;label for&gt;</code> (placeholder is not a label).</li><li>Group related controls with <code>&lt;fieldset&gt;</code> and <code>&lt;legend&gt;</code>.</li><li>Use correct <code>type</code> (email, tel) and <code>autocomplete</code> (e.g. <code>current-password</code>, <code>new-password</code>).</li><li>Link errors with <code>aria-describedby</code> and announce with <code>aria-live</code>.</li><li>Everything reachable and operable by keyboard.</li></ul>`],
+["html","Mid","When should you use ARIA?",`<p>Only when no native element does the job. First rule of ARIA: prefer a native <code>&lt;button&gt;</code> over <code>&lt;div role="button"&gt;</code>. Use ARIA for custom widgets (tabs, comboboxes), live regions and states like <code>aria-expanded</code>. Wrong ARIA is worse than none.</p>`],
+["html","Mid","localStorage vs sessionStorage vs cookies?",`<ul><li><b>localStorage</b>: ~5 MB, persists until cleared, JS-readable, never sent to server.</li><li><b>sessionStorage</b>: same, but scoped to the tab and cleared when it closes.</li><li><b>Cookies</b>: ~4 KB, sent with every request, can be <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite</code>. Use for session/refresh tokens.</li></ul><p class="tip"><b>Follow-up:</b> never store auth tokens in localStorage; any XSS can read them.</p>`],
+["html","Mid","What are <code>preload</code>, <code>prefetch</code> and <code>preconnect</code>?",`<ul><li><code>preload</code>: fetch a resource needed for this page now (hero image, font).</li><li><code>prefetch</code>: low-priority fetch for a likely next navigation.</li><li><code>preconnect</code>: open DNS/TCP/TLS to an origin early.</li></ul>`],
+["html","Senior","How would you improve Core Web Vitals (LCP, INP, CLS)?",`<ul><li><b>LCP</b>: preload hero image, serve from CDN, SSR/SSG the above-the-fold content, compress images (AVIF/WebP).</li><li><b>INP</b>: break long tasks, reduce JS, defer non-critical scripts, use <code>startTransition</code>.</li><li><b>CLS</b>: set width/height or <code>aspect-ratio</code> on media, reserve space for ads/embeds, use <code>font-display</code> with matched fallbacks.</li></ul>`],
+
+// ---------- CSS ----------
+["css","Junior","Explain the CSS box model.",`<p>Every element is content + padding + border + margin. With <code>box-sizing: content-box</code> (default) width covers content only; with <code>border-box</code> width includes padding and border, which is why most resets set <code>*{box-sizing:border-box}</code>.</p>`],
+["css","Junior","How is specificity calculated?",`<p>Compared as a tuple (inline, IDs, classes/attributes/pseudo-classes, elements). <code>#nav .item a</code> = (0,1,1,1). Higher wins; ties go to the later rule. <code>!important</code> overrides all normal declarations. <code>:where()</code> has zero specificity; <code>:is()</code> takes its most specific argument.</p>`],
+["css","Junior","Flexbox vs Grid: when to use which?",`<p>Flexbox is one-dimensional: a row or a column of items, content decides size (nav bars, button groups). Grid is two-dimensional: you define rows and columns and place items (page layouts, card galleries). They combine well: grid for the page, flex inside components.</p>`],
+["css","Junior","How do you center a div horizontally and vertically?",`<pre><code>.parent { display: grid; place-items: center; }
+/* or */
+.parent { display: flex; justify-content: center; align-items: center; }</code></pre>`],
+["css","Mid","Explain <code>position</code>: static, relative, absolute, fixed, sticky.",`<ul><li><b>relative</b>: offset from its normal spot, still takes space; becomes containing block for absolute children.</li><li><b>absolute</b>: removed from flow, positioned against nearest positioned ancestor.</li><li><b>fixed</b>: positioned against the viewport.</li><li><b>sticky</b>: normal until a scroll threshold, then sticks within its parent.</li></ul>`],
+["css","Mid","What creates a stacking context, and why doesn't my z-index work?",`<p>A stacking context is created by <code>position</code> + <code>z-index</code>, <code>opacity &lt; 1</code>, <code>transform</code>, <code>filter</code>, <code>isolation: isolate</code> and more. z-index only compares siblings inside the same context, so a child with z-index 9999 cannot escape a parent context that sits below another element.</p>`],
+["css","Mid","How do you build a responsive layout? Mobile-first?",`<p>Mobile-first: write base styles for small screens, add <code>@media (min-width: …)</code> for larger. Use fluid units (%, rem, <code>clamp()</code>), <code>grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))</code>, and container queries for component-level responsiveness.</p>`],
+["css","Mid","What are CSS custom properties and how do they differ from Sass variables?",`<p>Custom properties (<code>--brand: #2c56c9</code>) live in the browser, cascade, inherit and can change at runtime (theming, dark mode via <code>data-theme</code>). Sass variables are compiled away at build time and cannot change after.</p>`],
+["css","Mid","rem vs em vs px vs vh?",`<p><code>px</code> is absolute. <code>em</code> is relative to the element's font size (compounds when nested). <code>rem</code> is relative to the root font size (predictable, respects user settings). <code>vh/vw</code> are viewport percentages; prefer <code>dvh</code> on mobile to avoid the address-bar jump.</p>`],
+["css","Senior","What are container queries and <code>:has()</code>?",`<p><code>@container (min-width: 400px)</code> styles a component by its container's size, not the viewport, so the same card works in a sidebar and a main column. <code>:has()</code> is a parent selector: <code>form:has(input:invalid) button { opacity:.5 }</code>.</p>`],
+["css","Senior","CSS Modules vs Tailwind vs CSS-in-JS in a Next.js app?",`<ul><li><b>CSS Modules</b>: scoped class names, zero runtime, works with Server Components.</li><li><b>Tailwind</b>: utility classes, zero runtime, small final CSS, fast iteration; can make markup noisy.</li><li><b>Runtime CSS-in-JS</b> (styled-components, Emotion): needs client components and adds runtime cost; not a good fit for RSC. Zero-runtime options (vanilla-extract, Panda) avoid that.</li></ul>`],
+["css","Senior","How do you avoid layout thrashing and janky animations?",`<p>Animate only <code>transform</code> and <code>opacity</code> (compositor-only). Batch DOM reads before writes; don't read <code>offsetHeight</code> inside a loop that writes styles. Use <code>will-change</code> sparingly and respect <code>prefers-reduced-motion</code>.</p>`],
+
+// ---------- JS ----------
+["js","Junior","<code>var</code> vs <code>let</code> vs <code>const</code>?",`<p><code>var</code> is function-scoped and hoisted as <code>undefined</code>. <code>let</code>/<code>const</code> are block-scoped and in the temporal dead zone until declared. <code>const</code> prevents reassignment, not mutation of the object.</p>`],
+["js","Junior","<code>==</code> vs <code>===</code>?",`<p><code>==</code> coerces types (<code>'1' == 1</code> is true, <code>null == undefined</code> is true). <code>===</code> compares type and value. Use <code>===</code>.</p>`],
+["js","Junior","What is a closure? Give a use.",`<p>A function that remembers variables from the scope where it was created, even after that scope finished.</p><pre><code>function counter() {
+  let n = 0;
+  return () => ++n;
+}
+const next = counter(); next(); // 1, next(); // 2</code></pre><p>Used for data privacy, memoization, debounce, and React hooks themselves.</p>`],
+["js","Mid","Explain the event loop, microtasks and macrotasks.",`<p>JS runs one call stack. When it empties, the loop drains <b>all microtasks</b> (Promise callbacks, <code>queueMicrotask</code>) then takes <b>one macrotask</b> (setTimeout, I/O, events), then renders if needed.</p><pre><code>console.log(1);
+setTimeout(() => console.log(2));
+Promise.resolve().then(() => console.log(3));
+console.log(4);   // 1 4 3 2</code></pre>`],
+["js","Mid","How does <code>this</code> work? Arrow functions?",`<p><code>this</code> depends on how a function is called: method call → the object; plain call → <code>undefined</code> in strict mode; <code>new</code> → the new instance; <code>call/apply/bind</code> → explicit. Arrow functions have no own <code>this</code>; they take it from the enclosing scope.</p>`],
+["js","Mid","Promise.all vs allSettled vs race vs any?",`<ul><li><code>all</code>: resolves when all resolve, rejects on first rejection.</li><li><code>allSettled</code>: waits for all, gives status of each.</li><li><code>race</code>: first to settle (resolve or reject).</li><li><code>any</code>: first to resolve; rejects only if all reject.</li></ul>`],
+["js","Mid","Implement debounce.",`<pre><code>function debounce(fn, ms) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}</code></pre><p>Debounce waits for a pause (search input). Throttle runs at most once per interval (scroll).</p>`],
+["js","Mid","What is event delegation?",`<p>Attach one listener on a parent and use <code>event.target.closest(...)</code> to handle clicks on many children, including ones added later. Works because events bubble.</p>`],
+["js","Mid","Shallow vs deep copy?",`<p>Spread and <code>Object.assign</code> copy one level; nested objects are shared. <code>structuredClone(obj)</code> does a real deep copy (handles Dates, Maps, cycles; not functions).</p>`],
+["js","Senior","TypeScript: <code>interface</code> vs <code>type</code>, and what are generics?",`<p>Both describe shapes. Interfaces can be merged and extended; types can express unions, intersections, mapped and conditional types. Generics make reusable typed code:</p><pre><code>function first&lt;T&gt;(arr: T[]): T | undefined { return arr[0]; }</code></pre><p>Also know <code>unknown</code> vs <code>any</code>, <code>Partial</code>, <code>Pick</code>, <code>Omit</code>, <code>Record</code>, and discriminated unions.</p>`],
+["js","Senior","How does prototypal inheritance work?",`<p>Each object has a hidden <code>[[Prototype]]</code> link. Property lookup walks the chain until found or <code>null</code>. <code>class</code> is syntax sugar over this: methods live on <code>Class.prototype</code>.</p>`],
+
+// ---------- React ----------
+["react","Junior","What is the Virtual DOM and reconciliation?",`<p>React builds a tree of elements in memory, diffs it against the previous one on each render, and applies only the minimal DOM changes. Elements of a different type are replaced; lists are matched by <code>key</code>.</p>`],
+["react","Junior","Why do list items need a <code>key</code>? Why not use the index?",`<p>Keys let React match items between renders. With index keys, inserting or reordering shifts keys, so React reuses the wrong component state (inputs show wrong values). Use a stable id.</p>`],
+["react","Junior","Props vs state?",`<p>Props are inputs passed from the parent, read-only. State is data a component owns and changes with a setter, which triggers a re-render.</p>`],
+["react","Junior","Controlled vs uncontrolled components?",`<p>Controlled: the input value lives in React state (<code>value</code> + <code>onChange</code>). Uncontrolled: the DOM holds the value and you read it via a ref or <code>FormData</code>. Controlled gives instant validation; uncontrolled is simpler and works well with Server Actions.</p>`],
+["react","Mid","Explain <code>useEffect</code>: dependency array and cleanup.",`<pre><code>useEffect(() => {
+  const id = setInterval(tick, 1000);
+  return () => clearInterval(id); // cleanup
+}, [tick]);</code></pre><ul><li>No array: runs after every render. <code>[]</code>: once after mount. <code>[a,b]</code>: when those change.</li><li>Cleanup runs before the next effect and on unmount.</li><li>Don't use effects to derive state; compute it during render instead.</li></ul>`],
+["react","Mid","<code>useMemo</code> vs <code>useCallback</code> vs <code>React.memo</code>?",`<p><code>useMemo</code> caches a computed value; <code>useCallback</code> caches a function reference; <code>React.memo</code> skips re-rendering a component when props are shallow-equal. They work together: memo'd child + stable callback. With the React Compiler (React 19), much of this is done automatically.</p>`],
+["react","Mid","When does a component re-render?",`<p>When its state changes, its parent re-renders, or a context it reads changes. Props changing is not itself the trigger; the parent re-rendering is.</p>`],
+["react","Mid","<code>useRef</code> uses?",`<p>Access a DOM node (focus an input) and hold a mutable value that survives renders without causing a re-render (timer ids, previous value).</p>`],
+["react","Mid","Context API vs Redux / Zustand? How do you pick state management?",`<ul><li>Local UI state → <code>useState</code>.</li><li>Server data → TanStack Query or RSC fetches (caching, refetch, dedupe).</li><li>Rarely changing global values (theme, user) → Context.</li><li>Frequent global client state → Zustand or Redux Toolkit (selectors avoid re-rendering every consumer).</li><li>Shareable UI state → URL search params.</li></ul>`],
+["react","Mid","What is a custom hook? Write one.",`<pre><code>function useDebounce(value, ms = 300) {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setV(value), ms);
+    return () => clearTimeout(t);
+  }, [value, ms]);
+  return v;
+}</code></pre><p>A function starting with <code>use</code> that calls other hooks to share stateful logic.</p>`],
+["react","Mid","Rules of hooks?",`<p>Call hooks only at the top level (not in loops, conditions, or after early returns) and only from components or custom hooks. React relies on call order to match state to hooks.</p>`],
+["react","Senior","What is new in React 19?",`<ul><li>Actions: async functions in transitions, with <code>useActionState</code> and <code>useFormStatus</code>.</li><li><code>useOptimistic</code> for optimistic UI.</li><li><code>use()</code> to read promises and context during render.</li><li>Server Components and Server Actions stable.</li><li><code>ref</code> as a normal prop (no <code>forwardRef</code>), document metadata in components.</li><li>React Compiler for automatic memoization.</li></ul>`],
+["react","Senior","Explain Suspense, <code>useTransition</code> and concurrent rendering.",`<p>Concurrent rendering lets React pause and prioritise work. <code>startTransition</code> marks an update as non-urgent so typing stays responsive while a heavy list re-renders. Suspense shows a fallback while children wait for code or data, and enables streaming HTML on the server.</p>`],
+["react","Senior","How do you find and fix performance problems in a React app?",`<ol><li>Measure: React DevTools Profiler, Lighthouse, Web Vitals.</li><li>Stop unnecessary renders: move state down, split context, memoize.</li><li>Virtualize long lists (TanStack Virtual).</li><li>Code-split with <code>lazy()</code> / dynamic imports.</li><li>Move data fetching and heavy libraries to Server Components.</li></ol>`],
+["react","Senior","What are Error Boundaries and what don't they catch?",`<p>Class components with <code>getDerivedStateFromError</code>/<code>componentDidCatch</code> that catch render errors in their subtree and show a fallback. They don't catch errors in event handlers, async code, or the boundary itself. In Next.js, <code>error.tsx</code> is an error boundary per route segment.</p>`],
+
+// ---------- Next.js ----------
+["next","Junior","What is Next.js and why use it over plain React?",`<p>A React framework with file-based routing, server rendering (SSR/SSG/ISR), React Server Components, API routes, image/font optimization, and built-in bundling. You get SEO, faster first paint, and a backend in one project.</p>`],
+["next","Junior","App Router vs Pages Router?",`<ul><li><b>Pages</b> (<code>pages/</code>): every component is a client component; data via <code>getServerSideProps</code>/<code>getStaticProps</code>.</li><li><b>App</b> (<code>app/</code>): Server Components by default, nested layouts that don't remount, streaming, <code>loading.tsx</code>/<code>error.tsx</code>, Server Actions. The default for new projects.</li></ul>`],
+["next","Junior","What are the special files in the App Router?",`<p><code>page.tsx</code> (route UI), <code>layout.tsx</code> (shared, persists), <code>template.tsx</code> (remounts), <code>loading.tsx</code> (Suspense fallback), <code>error.tsx</code> (error boundary), <code>not-found.tsx</code>, <code>route.ts</code> (API handler), plus <code>middleware.ts</code> at the root.</p>`],
+["next","Mid","Server Components vs Client Components?",`<ul><li><b>Server</b> (default): run only on the server, can be <code>async</code>, query the DB and read secrets directly, ship zero JS.</li><li><b>Client</b> (<code>'use client'</code>): needed for state, effects, event handlers and browser APIs.</li><li>Server components can render client components and pass serializable props; client components can receive server components as <code>children</code>.</li></ul><p class="tip"><b>Tip:</b> push <code>'use client'</code> as far down the tree as possible.</p>`],
+["next","Mid","CSR vs SSR vs SSG vs ISR vs PPR?",`<ul><li><b>CSR</b>: browser fetches and renders. Dashboards behind login.</li><li><b>SSR</b>: HTML per request. Personalized, always fresh.</li><li><b>SSG</b>: HTML at build time. Blogs, docs.</li><li><b>ISR</b>: static, regenerated after <code>revalidate</code> seconds or on demand.</li><li><b>PPR</b> (Partial Prerendering): static shell served instantly with dynamic holes streamed in.</li></ul>`],
+["next","Mid","How does data fetching and caching work in the App Router?",`<pre><code>// async Server Component
+export default async function Page() {
+  const res = await fetch('https://api.example.com/posts',
+    { next: { revalidate: 60, tags: ['posts'] } });
+  const posts = await res.json();
+  return &lt;PostList posts={posts} /&gt;;
+}</code></pre><p>Control freshness with <code>revalidate</code>, <code>cache: 'no-store'</code>, <code>revalidatePath()</code> / <code>revalidateTag()</code>. Newer versions add the <code>'use cache'</code> directive and <code>cacheLife</code>. Know that caching is opt-in in Next 15+.</p>`],
+["next","Mid","What are Server Actions?",`<p>Async functions marked <code>'use server'</code> that run on the server and can be called from forms or client code, replacing many API routes for mutations.</p><pre><code>async function createPost(formData: FormData) {
+  'use server';
+  const session = await auth();          // always re-check auth
+  await db.post.create({ data: { title: formData.get('title') } });
+  revalidatePath('/posts');
+}</code></pre><p class="tip"><b>Follow-up:</b> treat every action as a public endpoint: validate input (Zod) and check authorization inside it.</p>`],
+["next","Mid","What does middleware do, and what are its limits?",`<p><code>middleware.ts</code> runs before a request is matched: redirects, rewrites, auth checks on cookies, A/B testing, geo, headers. Keep it light (it runs on every matching request). Don't rely on it as the only auth check; verify again in the data layer.</p>`],
+["next","Mid","Dynamic routes, route groups and parallel routes?",`<ul><li><code>[id]</code> dynamic, <code>[...slug]</code> catch-all, <code>[[...slug]]</code> optional catch-all.</li><li><code>(marketing)</code> route group: organizes files without affecting the URL; allows separate layouts.</li><li><code>@modal</code> parallel routes and <code>(.)photo</code> intercepting routes for modals with shareable URLs.</li></ul>`],
+["next","Mid","How do you handle SEO and metadata?",`<p>Export <code>metadata</code> or <code>generateMetadata()</code> from a page/layout for title, description, Open Graph. Add <code>sitemap.ts</code>, <code>robots.ts</code>, and <code>opengraph-image.tsx</code>. Server rendering makes content crawlable.</p>`],
+["next","Mid","How do <code>next/image</code> and <code>next/font</code> help?",`<p><code>next/image</code> resizes, serves modern formats, lazy-loads and requires dimensions to prevent CLS. <code>next/font</code> self-hosts fonts at build time and uses size-adjusted fallbacks to avoid layout shift.</p>`],
+["next","Senior","How do you implement authentication in a Next.js App Router app?",`<ul><li>Use Auth.js (NextAuth), Clerk, or a custom session: httpOnly, Secure, SameSite cookie.</li><li>Middleware for fast redirects of signed-out users.</li><li>A server-only <code>verifySession()</code> in a data access layer, called in every Server Component, Route Handler and Server Action that touches data.</li><li>Never pass secrets or full user rows to client components.</li></ul>`],
+["next","Senior","What is a hydration error and how do you fix it?",`<p>The server HTML doesn't match what the client renders first. Causes: <code>Date.now()</code>/random values, reading <code>window</code> or <code>localStorage</code> during render, invalid HTML nesting, browser extensions. Fix by moving browser-only logic into <code>useEffect</code>, using <code>dynamic(..., { ssr:false })</code>, or making output deterministic.</p>`],
+["next","Senior","How does streaming work in Next.js?",`<p>The server sends the layout and fallbacks immediately, then streams each Suspense boundary's HTML as its data resolves. Wrap slow parts in <code>&lt;Suspense&gt;</code> or add <code>loading.tsx</code>. Start independent fetches in parallel with <code>Promise.all</code> to avoid waterfalls.</p>`],
+["next","Senior","Route Handlers vs Server Actions: when to use which?",`<p>Server Actions for mutations from your own UI (forms, buttons). Route Handlers (<code>app/api/*/route.ts</code>) for public APIs, webhooks (Stripe), mobile clients, and GET endpoints other systems call.</p>`],
+["next","Senior","How would you deploy Next.js outside Vercel, e.g. on Azure?",`<p>Build with <code>output: 'standalone'</code>, containerize, and run on Azure App Service (Linux), Azure Container Apps or AKS. Put Azure Front Door/CDN in front for static assets. Static-only sites can go to Azure Static Web Apps. Configure env vars via App Settings and secrets via Key Vault references.</p>`],
+
+// ---------- Python ----------
+["python","Junior","List vs tuple vs set vs dict?",`<ul><li><b>list</b>: ordered, mutable, allows duplicates.</li><li><b>tuple</b>: ordered, immutable, hashable if contents are.</li><li><b>set</b>: unordered, unique items, O(1) membership.</li><li><b>dict</b>: key-value, insertion-ordered (3.7+), O(1) lookup.</li></ul>`],
+["python","Junior","Mutable vs immutable types, and the mutable default argument trap?",`<pre><code>def add(item, bucket=[]):   # same list reused every call!
+    bucket.append(item); return bucket
+
+def add(item, bucket=None):  # fix
+    bucket = [] if bucket is None else bucket</code></pre><p>Defaults are evaluated once when the function is defined.</p>`],
+["python","Junior","<code>is</code> vs <code>==</code>?",`<p><code>==</code> compares values; <code>is</code> compares identity (same object). Use <code>is</code> only for <code>None</code>, <code>True</code>, <code>False</code>.</p>`],
+["python","Junior","What are <code>*args</code> and <code>**kwargs</code>?",`<p><code>*args</code> collects extra positional arguments into a tuple; <code>**kwargs</code> collects keyword arguments into a dict. Also used to unpack when calling: <code>f(*items, **opts)</code>.</p>`],
+["python","Mid","What is a decorator? Write one.",`<pre><code>import functools, time
+def timed(fn):
+    @functools.wraps(fn)
+    def wrapper(*a, **kw):
+        t = time.perf_counter()
+        try: return fn(*a, **kw)
+        finally: print(fn.__name__, time.perf_counter() - t)
+    return wrapper</code></pre><p>A function that takes a function and returns a new one. Used for auth checks, caching, logging, retries.</p>`],
+["python","Mid","Generators and <code>yield</code>: why use them?",`<p>Generators produce values lazily, one at a time, keeping memory flat. Ideal for streaming large files or DB rows. <code>(x*x for x in data)</code> is a generator expression.</p>`],
+["python","Mid","What is the GIL? Threads vs processes vs asyncio?",`<p>The Global Interpreter Lock lets only one thread run Python bytecode at a time in CPython.</p><ul><li>I/O-bound → <code>asyncio</code> or threads.</li><li>CPU-bound → <code>multiprocessing</code> / <code>ProcessPoolExecutor</code>.</li><li>Python 3.13+ has an optional free-threaded (no-GIL) build; know it exists.</li></ul>`],
+["python","Mid","Explain <code>async</code>/<code>await</code> and the event loop in Python.",`<p>Coroutines pause at <code>await</code> so the event loop can run others while waiting on I/O. Run many concurrently with <code>asyncio.gather()</code> or <code>TaskGroup</code>. Never call blocking code (e.g. <code>requests</code>, <code>time.sleep</code>) inside async code; use <code>httpx</code>, <code>asyncio.sleep</code>, or <code>run_in_executor</code>.</p>`],
+["python","Mid","What are context managers?",`<p>Objects with <code>__enter__</code>/<code>__exit__</code> used by <code>with</code> to guarantee cleanup (files, DB transactions, locks). Write one quickly with <code>@contextlib.contextmanager</code>.</p>`],
+["python","Mid","Shallow vs deep copy in Python?",`<p><code>copy.copy()</code> / <code>list[:]</code> copy the outer container; inner objects are shared. <code>copy.deepcopy()</code> copies recursively.</p>`],
+["python","Senior","How does memory management and garbage collection work?",`<p>CPython uses reference counting (freed when count hits zero) plus a generational cycle collector for reference cycles. <code>__slots__</code> reduces per-instance memory; <code>weakref</code> avoids cycles in caches.</p>`],
+["python","Senior","dataclasses vs Pydantic models?",`<p>dataclasses generate <code>__init__</code>/<code>__repr__</code>/<code>__eq__</code> with no validation. Pydantic validates and coerces data at runtime and serializes to JSON; use it at API boundaries (FastAPI) and for settings.</p>`],
+["python","Senior","Explain MRO and <code>super()</code> with multiple inheritance.",`<p>Method Resolution Order uses C3 linearization (see <code>Cls.__mro__</code>). <code>super()</code> calls the next class in the MRO, not necessarily the direct parent, which makes cooperative mixins work.</p>`],
+
+// ---------- Python Backend ----------
+["pyweb","Junior","FastAPI vs Django vs Flask?",`<ul><li><b>FastAPI</b>: async, type hints + Pydantic validation, auto OpenAPI docs. Great for APIs.</li><li><b>Django</b>: batteries included (ORM, admin, auth, migrations). Great for full apps.</li><li><b>Flask</b>: minimal, pick your own pieces.</li></ul>`],
+["pyweb","Mid","How does dependency injection work in FastAPI?",`<pre><code>async def get_db():
+    async with SessionLocal() as db:
+        yield db
+
+async def current_user(token: str = Depends(oauth2_scheme),
+                       db = Depends(get_db)) -> User: ...
+
+@app.get("/me")
+async def me(user: User = Depends(current_user)):
+    return user</code></pre><p><code>Depends</code> wires DB sessions, auth and settings into routes, and makes them easy to override in tests.</p>`],
+["pyweb","Mid","How do you structure a production FastAPI project?",`<p>Routers per domain (<code>api/users.py</code>), Pydantic schemas separate from ORM models, a service layer for business logic, SQLAlchemy + Alembic migrations, settings via <code>pydantic-settings</code>, pytest with a test DB, run with Uvicorn/Gunicorn workers behind a reverse proxy.</p>`],
+["pyweb","Mid","What is the N+1 query problem and how do you fix it in Django / SQLAlchemy?",`<p>Loading a list then querying related rows once per item. Fix in Django with <code>select_related</code> (FK/one-to-one, JOIN) and <code>prefetch_related</code> (many-to-many, second query). In SQLAlchemy use <code>selectinload</code>/<code>joinedload</code>.</p>`],
+["pyweb","Mid","How do you run background jobs in Python?",`<p>Short fire-and-forget: FastAPI <code>BackgroundTasks</code>. Reliable/retryable work (emails, reports): Celery, RQ or Dramatiq with Redis/RabbitMQ, or Azure Service Bus + Azure Functions. Make tasks idempotent.</p>`],
+["pyweb","Mid","Explain Django's request lifecycle and middleware.",`<p>Request → WSGI/ASGI handler → middleware (in order) → URL resolver → view → template/serializer → middleware (reverse) → response. Middleware handles sessions, CSRF, auth, security headers.</p>`],
+["pyweb","Senior","How do you version and document a REST API?",`<p>URL versioning (<code>/api/v1</code>) or a header. Never break existing clients: add fields, don't rename. Publish OpenAPI (FastAPI generates it), and use it to generate a typed TypeScript client for the Next.js front end.</p>`],
+["pyweb","Senior","How do you test a FastAPI app?",`<p>pytest + <code>httpx.AsyncClient</code>/<code>TestClient</code>, override dependencies (<code>app.dependency_overrides</code>) for DB and auth, transactional fixtures that roll back, factory fixtures for data, and contract tests against the OpenAPI schema.</p>`],
+
+// ---------- DB & APIs ----------
+["db","Junior","SQL vs NoSQL: when to use each?",`<p>SQL (PostgreSQL, Azure SQL) for relational data, joins and ACID transactions (orders, users, payments). NoSQL (Cosmos DB, MongoDB, Redis) for flexible schemas, huge scale with simple access patterns, caching, or document data. Many systems use both.</p>`],
+["db","Junior","What are REST principles and common HTTP status codes?",`<p>Resources as nouns (<code>/users/42</code>), HTTP verbs for actions, stateless requests. Codes: 200 OK, 201 Created, 204 No Content, 400 Bad Request, 401 Unauthenticated, 403 Forbidden, 404 Not Found, 409 Conflict, 422 Validation error, 429 Too Many Requests, 500 Server error.</p>`],
+["db","Junior","PUT vs PATCH? Which methods are idempotent?",`<p>PUT replaces the whole resource; PATCH changes some fields. GET, PUT, DELETE are idempotent (repeating gives the same result); POST is not, so use idempotency keys for payments.</p>`],
+["db","Mid","What is an index and when does it hurt?",`<p>A B-tree (usually) that speeds lookups, sorts and joins on the indexed columns. It costs storage and slows writes. Composite indexes follow the leftmost-prefix rule. Check with <code>EXPLAIN ANALYZE</code>.</p>`],
+["db","Mid","Explain ACID and transaction isolation levels.",`<p>Atomicity, Consistency, Isolation, Durability. Isolation levels trade safety for concurrency: Read Uncommitted, Read Committed (Postgres default), Repeatable Read, Serializable. Know dirty reads, non-repeatable reads, phantom reads.</p>`],
+["db","Mid","Types of JOIN?",`<p>INNER (matches only), LEFT (all left + matches), RIGHT, FULL OUTER, CROSS (cartesian). Be ready to write a query like "users with no orders" using LEFT JOIN … WHERE o.id IS NULL.</p>`],
+["db","Mid","REST vs GraphQL vs tRPC?",`<p>REST: simple, cacheable, standard. GraphQL: client picks fields, one endpoint, avoids over/under-fetching, harder caching and N+1 risk on the server. tRPC: end-to-end types in TypeScript monorepos only. With a Python backend, REST + OpenAPI-generated types is the usual pick.</p>`],
+["db","Mid","How do you paginate an API?",`<p>Offset (<code>?page=3</code>) is simple but slow on deep pages and shifts when rows are inserted. Cursor/keyset (<code>WHERE id &gt; :last_id ORDER BY id LIMIT 20</code>) is stable and fast for infinite scroll.</p>`],
+["db","Senior","Normalization vs denormalization?",`<p>Normalize (1NF–3NF) to remove duplication and keep writes consistent. Denormalize selectively for read-heavy paths (counters, read models, materialized views) and accept the cost of keeping copies in sync.</p>`],
+["db","Senior","How do you handle database migrations with zero downtime?",`<p>Expand and contract: add the new column (nullable), deploy code that writes both, backfill, switch reads, then remove the old column in a later release. Avoid long table locks; create indexes <code>CONCURRENTLY</code> in Postgres.</p>`],
+
+// ---------- AUTH ----------
+["auth","Junior","Authentication vs authorization?",`<p>Authentication (AuthN) proves who you are (login). Authorization (AuthZ) decides what you may do (roles, permissions). A 401 means "not authenticated"; a 403 means "authenticated but not allowed".</p>`],
+["auth","Junior","How should passwords be stored?",`<p>Never plaintext or plain SHA/MD5. Use a slow, salted, adaptive hash: <b>Argon2id</b> (preferred) or bcrypt. The salt is unique per user and stored with the hash. Compare in constant time.</p><pre><code>from argon2 import PasswordHasher
+ph = PasswordHasher()
+hash = ph.hash(password)
+ph.verify(hash, attempt)  # raises on mismatch</code></pre>`],
+["auth","Mid","Design the signup and email verification flow.",`<ol><li>Validate email + password strength (check against breached-password lists).</li><li>Create user with <code>email_verified=false</code>, hashed password.</li><li>Generate a random token (32 bytes, <code>secrets.token_urlsafe</code>), store <b>its hash</b> with expiry (e.g. 24h).</li><li>Queue email with link <code>/verify?token=…</code> (async via a job queue).</li><li>On click: hash the token, look it up, check expiry, mark verified, delete token.</li><li>Allow resend with rate limits.</li></ol><p class="tip"><b>Follow-up:</b> if the email already exists, show the same message ("check your inbox") to prevent account enumeration.</p>`],
+["auth","Mid","Design a secure forgot / reset password flow.",`<ol><li>User enters email. Always respond "If an account exists, we sent a link" (no enumeration).</li><li>Generate a single-use, random, high-entropy token; store only its hash, expire in 15–60 minutes.</li><li>Email link over HTTPS. Rate-limit requests per email and IP.</li><li>On submit: verify token hash and expiry, set new hashed password, delete the token (and all other reset tokens).</li><li><b>Revoke all existing sessions / refresh tokens</b> for that user.</li><li>Send a "your password was changed" notification email.</li></ol><p class="tip"><b>Common mistakes:</b> predictable tokens, tokens that never expire, reusable tokens, leaking token in Referer headers (set <code>Referrer-Policy: no-referrer</code> on the reset page), using a host header to build the link.</p>`],
+["auth","Mid","Session cookies vs JWT: trade-offs?",`<ul><li><b>Server sessions</b>: random session id in an httpOnly cookie, data in Redis/DB. Instant revocation, simple; needs a shared store.</li><li><b>JWT</b>: signed token carrying claims; stateless verification, good across services. Hard to revoke before expiry, larger, easy to misuse.</li><li>Common hybrid: short-lived JWT access token (5–15 min) + long-lived refresh token stored server-side and rotated.</li></ul>`],
+["auth","Mid","What is inside a JWT and how is it verified?",`<p><code>header.payload.signature</code>, base64url-encoded. Header has <code>alg</code>/<code>kid</code>; payload has claims (<code>sub</code>, <code>exp</code>, <code>iat</code>, <code>iss</code>, <code>aud</code>, roles). The payload is <b>readable by anyone</b>; don't put secrets in it. Verify signature with the expected algorithm (reject <code>alg: none</code>), then check <code>exp</code>, <code>iss</code>, <code>aud</code>. HS256 uses a shared secret; RS256/ES256 use a private key to sign and a public key (JWKS) to verify.</p>`],
+["auth","Mid","Where should tokens be stored in the browser?",`<p>Refresh token (or session id) in an <code>HttpOnly; Secure; SameSite=Lax/Strict</code> cookie so JS can't read it. Access token in memory. Avoid localStorage (XSS can read it). If using cookies, protect state-changing requests against CSRF (SameSite + CSRF token or checking <code>Origin</code>).</p>`],
+["auth","Senior","Explain refresh token rotation and reuse detection.",`<p>Each time a refresh token is used, issue a new one and invalidate the old one. All tokens from one login form a "family". If an old (already used) token shows up again, someone stole it: revoke the whole family and force re-login. Store refresh tokens hashed with device info and expiry.</p>`],
+["auth","Senior","Explain OAuth 2.0 Authorization Code flow with PKCE and OpenID Connect.",`<ol><li>App creates <code>code_verifier</code> and its SHA-256 <code>code_challenge</code>.</li><li>Redirect user to the provider (Google, Entra ID) with <code>client_id</code>, <code>redirect_uri</code>, <code>scope</code>, <code>state</code>, <code>code_challenge</code>.</li><li>User logs in and consents; provider redirects back with a <code>code</code>.</li><li>App's backend exchanges code + <code>code_verifier</code> for tokens.</li><li>OIDC adds an <b>ID token</b> (who the user is); OAuth's access token is for calling APIs.</li></ol><p class="tip"><b>Follow-up:</b> <code>state</code> prevents CSRF on the callback; PKCE stops intercepted codes from being used. Implicit flow is deprecated.</p>`],
+["auth","Senior","How do you protect login against brute force and credential stuffing?",`<ul><li>Rate limit per IP and per account (sliding window in Redis), progressive delays.</li><li>Temporary lockout or CAPTCHA after repeated failures (careful: lockouts can be abused for DoS).</li><li>Check passwords against breached lists (HaveIBeenPwned k-anonymity API).</li><li>MFA, anomaly detection (new device/location email), generic error "Invalid email or password".</li></ul>`],
+["auth","Senior","How would you add MFA and passkeys?",`<ul><li><b>TOTP</b>: store an encrypted shared secret, show QR code, verify 6-digit codes with a small time window; give one-time recovery codes (stored hashed).</li><li><b>Passkeys / WebAuthn</b>: device creates a key pair; server stores the public key and verifies signed challenges. Phishing-resistant, no shared secret.</li><li>SMS OTP is the weakest option (SIM swapping).</li></ul>`],
+["auth","Senior","Design RBAC for a multi-tenant SaaS.",`<p>Tables: users, tenants, memberships (user, tenant, role), roles → permissions. Every query is scoped by <code>tenant_id</code> (or Postgres row-level security). Check permissions server-side in a single policy function, not in UI code. For complex rules consider ABAC or tools like OpenFGA/Cerbos.</p>`],
+["auth","Senior","Walk through the full login architecture end to end.",`<ol><li>Next.js form posts to the API over HTTPS.</li><li>API rate-limits, loads user by email, verifies Argon2 hash, checks <code>email_verified</code> and MFA.</li><li>Issues short-lived access token + rotated refresh token (httpOnly cookie); records session (device, IP) in DB/Redis.</li><li>Next.js middleware checks the cookie for route protection; the API validates the token on every call.</li><li>Logout deletes the session/refresh token server-side and clears cookies.</li><li>Audit log for logins, resets and MFA changes.</li></ol><p>See the diagrams at the top of this section.</p>`],
+["auth","Senior","How does logout work with JWTs if they're stateless?",`<p>Delete the refresh token server-side and clear cookies; the short-lived access token expires within minutes. For instant revocation keep a denylist of token <code>jti</code>s (in Redis, until expiry) or a per-user <code>token_version</code> that is checked on each request.</p>`],
+
+// ---------- AZURE ----------
+["azure","Junior","IaaS vs PaaS vs SaaS with Azure examples?",`<p>IaaS: Azure Virtual Machines (you manage OS). PaaS: App Service, Azure SQL, Functions (Azure manages OS and runtime). SaaS: Microsoft 365. Full stack apps usually run on PaaS.</p>`],
+["azure","Junior","What is Azure App Service?",`<p>Managed hosting for web apps and APIs (Python, Node, .NET, containers). Provides autoscaling, deployment slots, custom domains, TLS, built-in auth ("Easy Auth"), and CI/CD integration.</p>`],
+["azure","Junior","What are resource groups, subscriptions and regions?",`<p>A subscription is a billing and access boundary. Resource groups are logical containers for resources that share a lifecycle (delete the group, delete everything). Regions are the physical datacenter locations; pick close to users and pair for DR.</p>`],
+["azure","Mid","What are deployment slots and why use them?",`<p>Separate live environments (e.g. <code>staging</code>) of the same App Service. Deploy to staging, warm it up, test, then <b>swap</b> with production for zero-downtime release and instant rollback by swapping back.</p>`],
+["azure","Mid","Azure Functions: triggers, bindings, and hosting plans?",`<p>Serverless functions started by triggers (HTTP, Timer, Queue, Service Bus, Blob, Event Grid, Cosmos DB). Bindings connect inputs/outputs declaratively. Plans: Consumption / Flex Consumption (pay per execution, cold starts), Premium (pre-warmed, VNet), Dedicated (App Service plan). Durable Functions add stateful workflows.</p>`],
+["azure","Mid","What is Microsoft Entra ID (Azure AD) and how does it relate to app login?",`<p>Azure's identity service: users, groups, app registrations, and OAuth 2.0 / OpenID Connect tokens. Use it for employee SSO and API protection. For customer-facing login (sign-up, social logins, password reset) use <b>Entra External ID</b> (successor to Azure AD B2C). In code, use MSAL (<code>msal-browser</code>, <code>msal</code> for Python) or Auth.js with the Entra provider.</p>`],
+["azure","Mid","What is a Managed Identity? System vs user-assigned?",`<p>An identity in Entra ID that Azure manages for a resource, so code can access Key Vault, Storage or SQL <b>without any secret</b> (<code>DefaultAzureCredential</code>). System-assigned lives and dies with one resource; user-assigned is standalone and can be shared across resources.</p>`],
+["azure","Mid","How do you manage secrets on Azure?",`<p>Store in Azure Key Vault; grant access with managed identity + RBAC; reference them in App Service settings as <code>@Microsoft.KeyVault(SecretUri=…)</code>. Never commit secrets; rotate them; enable soft-delete and purge protection.</p>`],
+["azure","Mid","Blob Storage tiers and SAS tokens?",`<p>Tiers: Hot, Cool, Cold, Archive (cheaper storage, costlier access). A SAS (Shared Access Signature) grants time-limited, scoped access to a blob, e.g. let the browser upload a file directly without going through your API. Prefer user-delegation SAS (signed with Entra credentials).</p>`],
+["azure","Mid","Service Bus vs Storage Queues vs Event Grid vs Event Hubs?",`<ul><li><b>Storage Queue</b>: simple, cheap, large backlog.</li><li><b>Service Bus</b>: enterprise messaging: FIFO sessions, topics/subscriptions, dead-lettering, transactions.</li><li><b>Event Grid</b>: reactive event routing (blob created → function).</li><li><b>Event Hubs</b>: high-throughput streaming/telemetry.</li></ul>`],
+["azure","Senior","How would you architect a Next.js + Python app on Azure?",`<ul><li>Front Door (CDN + WAF) → Next.js on App Service / Container Apps.</li><li>FastAPI on Container Apps or App Service, autoscaled.</li><li>Azure Database for PostgreSQL / Azure SQL; Azure Cache for Redis for sessions and rate limits.</li><li>Blob Storage for uploads; Service Bus + Functions for emails and background jobs; Azure Communication Services or SendGrid for email.</li><li>Entra External ID for customer auth; Key Vault + managed identity for secrets.</li><li>Application Insights + Log Analytics for monitoring; private endpoints + VNet for DB.</li><li>Bicep/Terraform for infra; GitHub Actions or Azure DevOps for CI/CD.</li></ul>`],
+["azure","Senior","How do you set up CI/CD to Azure?",`<p>GitHub Actions or Azure Pipelines: lint + test → build container → push to Azure Container Registry → deploy to staging slot → smoke tests → swap to production. Authenticate with OIDC federated credentials (no stored secrets). Infra as code with Bicep or Terraform in the same pipeline.</p>`],
+["azure","Senior","How do you monitor and troubleshoot an Azure app?",`<p>Application Insights (requests, dependencies, exceptions, distributed tracing via OpenTelemetry), Log Analytics with KQL queries, alerts on failure rate and latency, availability tests, App Service diagnostics and log stream.</p>`],
+["azure","Senior","Azure RBAC vs Entra ID roles?",`<p>Azure RBAC controls access to Azure resources (Contributor on a resource group) with scope inheritance: management group → subscription → resource group → resource. Entra ID roles control directory administration (User Administrator). Grant least privilege at the narrowest scope.</p>`],
+
+// ---------- SYSTEM DESIGN ----------
+["design","Mid","How would you scale a web application?",`<p>Stateless app servers behind a load balancer (scale horizontally), CDN for static assets, caching (Redis) for hot reads, database read replicas and indexing, queues for slow work, and later sharding or splitting services where there is a real bottleneck.</p>`],
+["design","Mid","Caching strategies and invalidation?",`<p>Cache-aside (app reads cache, falls back to DB, then fills cache), write-through, write-behind. Invalidate by TTL, by explicit delete on write, or by versioned keys. Browser/CDN caching via <code>Cache-Control</code>, <code>ETag</code>. Watch for cache stampedes (use locks or stale-while-revalidate).</p>`],
+["design","Mid","Monolith vs microservices?",`<p>Start with a well-structured modular monolith: simpler deploys, transactions and debugging. Split out services when teams or scaling needs differ; microservices add network failures, distributed data and ops overhead.</p>`],
+["design","Mid","How do you implement rate limiting?",`<p>Token bucket or sliding window counters in Redis, keyed by user/IP/API key. Return 429 with <code>Retry-After</code>. Apply at the gateway (Front Door, API Management) and in the app for sensitive endpoints like login and password reset.</p>`],
+["design","Senior","Design a URL shortener / notification system / file upload service.",`<p>Use a repeatable structure:</p><ol><li>Clarify requirements and scale (users, QPS, read/write ratio).</li><li>API design and data model.</li><li>High-level diagram: client, CDN, LB, services, DB, cache, queue.</li><li>Deep dive into the hardest part (ID generation, fan-out, large uploads via presigned/SAS URLs).</li><li>Bottlenecks, failure modes, monitoring, trade-offs.</li></ol>`],
+["design","Senior","What is the CAP theorem?",`<p>During a network partition a distributed store must choose Consistency (reject or block) or Availability (serve possibly stale data). Without partitions you trade latency vs consistency (PACELC). Cosmos DB exposes five consistency levels for this reason.</p>`],
+["design","Senior","How do you make a system observable?",`<p>Structured logs with a correlation/request id, metrics (RED: rate, errors, duration), distributed traces with OpenTelemetry, dashboards and SLO-based alerts. Log auth events without logging passwords or tokens.</p>`],
+["design","Senior","What is idempotency and why does it matter for APIs and queues?",`<p>Repeating an operation has the same effect as doing it once. Queues deliver at-least-once and clients retry on timeouts, so handlers must dedupe (idempotency key stored with the result, unique constraints, upserts).</p>`],
+["design","Junior","What happens when you type a URL and press Enter?",`<p>DNS lookup → TCP + TLS handshake → HTTP request → server/CDN responds → browser parses HTML, builds DOM and CSSOM, runs JS, lays out, paints. Mention caching, HTTP/2 or HTTP/3, and where SSR fits.</p>`],
+["design","Mid","Docker basics: image vs container, multi-stage builds?",`<p>An image is a read-only template; a container is a running instance. Multi-stage builds compile in one stage and copy only the output into a slim runtime image (e.g. Next.js <code>standalone</code> output on <code>node:alpine</code>, FastAPI on <code>python:slim</code>).</p>`],
+
+// ---------- SECURITY ----------
+["security","Junior","What is XSS and how do you prevent it?",`<p>Cross-Site Scripting: attacker-controlled script runs in your page. React escapes text by default; danger comes from <code>dangerouslySetInnerHTML</code>, <code>href="javascript:…"</code>, and unsanitized HTML. Prevent with output encoding, DOMPurify for user HTML, a Content-Security-Policy, and httpOnly cookies.</p>`],
+["security","Mid","What is CSRF and how do you prevent it?",`<p>Cross-Site Request Forgery: another site makes the victim's browser send an authenticated request with their cookies. Prevent with <code>SameSite=Lax/Strict</code> cookies, CSRF tokens, checking <code>Origin</code>, and never changing state on GET. Next.js Server Actions check Origin automatically.</p>`],
+["security","Mid","What is CORS?",`<p>A browser rule that blocks JS from reading responses from another origin unless the server allows it with <code>Access-Control-Allow-Origin</code>. Non-simple requests send an OPTIONS preflight. CORS is not a security wall for your API (curl ignores it); it protects users' browsers. Never use <code>*</code> with credentials.</p>`],
+["security","Mid","How do you prevent SQL injection?",`<p>Parameterized queries or an ORM; never build SQL with string formatting. Validate input, least-privilege DB user.</p><pre><code>cur.execute("SELECT * FROM users WHERE email = %s", (email,))</code></pre>`],
+["security","Mid","What are the OWASP Top 10?",`<p>Broken access control, cryptographic failures, injection, insecure design, security misconfiguration, vulnerable components, identification and authentication failures, software and data integrity failures, logging and monitoring failures, SSRF. Broken access control is number one: always check ownership on the server (<code>WHERE id=:id AND user_id=:me</code>).</p>`],
+["security","Senior","Which security headers do you set?",`<p><code>Content-Security-Policy</code>, <code>Strict-Transport-Security</code>, <code>X-Content-Type-Options: nosniff</code>, <code>Referrer-Policy</code>, <code>X-Frame-Options</code>/<code>frame-ancestors</code>, <code>Permissions-Policy</code>. Set in <code>next.config.js</code> headers or middleware.</p>`],
+["security","Senior","What is SSRF?",`<p>Server-Side Request Forgery: the attacker makes your server fetch a URL they choose, e.g. an internal service or cloud metadata endpoint (<code>169.254.169.254</code>). Prevent by allow-listing domains, blocking private IP ranges after DNS resolution, and isolating fetchers.</p>`],
+
+// ---------- BEHAVIORAL ----------
+["behav","Junior","Walk me through a project you built end to end.",`<p>Structure: the problem and users → your stack and why (e.g. Next.js + FastAPI + PostgreSQL on Azure) → one hard technical decision → what you'd do differently → measurable result. Keep it to 2–3 minutes.</p>`],
+["behav","Mid","Tell me about a production bug you debugged.",`<p>Use STAR. Show method: reproduce, read logs/traces (App Insights), form a hypothesis, isolate, fix, add a test and monitoring so it can't recur. Mention communication with the team during the incident.</p>`],
+["behav","Mid","An API endpoint became slow. How do you investigate?",`<ol><li>Confirm with metrics: which endpoint, since when, p95/p99.</li><li>Check recent deploys and traffic changes.</li><li>Trace the request: DB time vs external calls vs app CPU.</li><li>Run <code>EXPLAIN ANALYZE</code> on slow queries; look for missing indexes or N+1.</li><li>Fix, add caching if appropriate, and set an alert.</li></ol>`],
+["behav","Mid","How do you handle disagreement on a technical decision?",`<p>Understand their reasons, compare options against agreed criteria (cost, risk, time), prototype or measure when possible, decide and document (ADR), then commit fully even if your option lost.</p>`],
+["behav","Senior","How do you use AI coding tools and make sure the code is correct?",`<p>Use them for scaffolding, tests and exploring APIs; review every line, run tests and type checks, check security-sensitive code (auth, SQL, secrets) by hand, and never paste secrets or customer data into prompts. Interviewers in 2026 often ask this directly.</p>`],
+["behav","Senior","How do you estimate and break down a feature?",`<p>Split into thin vertical slices (UI + API + DB) that each ship value, identify unknowns and spike them first, estimate in ranges, and flag risks early. Example: "password reset" → token table + endpoint, email job, reset page, session revocation, rate limiting, tests.</p>`],
+["behav","Senior","Why should we hire you for a 4-year full stack role? What is your ownership story?",`<p>Show scope growth: a feature you owned from design to production, a decision you made (and its trade-off), how you mentored someone or improved a team process (code review, CI, testing), and a metric that moved (latency, conversion, incidents).</p>`],
+
+// ---------- JS CODING (machine round) ----------
+["jscode","Mid","Predict the output: closures in a loop with <code>var</code> vs <code>let</code>.",`<pre><code>for (var i = 0; i &lt; 3; i++) setTimeout(() => console.log(i));
+// 3 3 3  (one shared i, loop finished before callbacks run)
+for (let j = 0; j &lt; 3; j++) setTimeout(() => console.log(j));
+// 0 1 2  (let creates a new binding per iteration)</code></pre>`],
+["jscode","Mid","Predict the output: event loop ordering.",`<pre><code>console.log('A');
+setTimeout(() => console.log('B'), 0);
+Promise.resolve().then(() => console.log('C'))
+                 .then(() => console.log('D'));
+queueMicrotask(() => console.log('E'));
+(async () => { console.log('F'); await null; console.log('G'); })();
+console.log('H');
+// A F H C E G D B</code></pre><p>Sync first (A, F, H), then all microtasks in queue order (C, E, G, then D which was queued by C), then the macrotask (B).</p>`],
+["jscode","Mid","Predict the output: <code>this</code> in methods and arrows.",`<pre><code>const obj = {
+  name: 'x',
+  regular() { return this.name; },
+  arrow: () => this?.name,
+  nested() { return [1].map(() => this.name); }
+};
+obj.regular();          // 'x'
+obj.arrow();            // undefined (this from module scope)
+obj.nested();           // ['x'] (arrow takes nested's this)
+const f = obj.regular; f(); // TypeError in strict mode (this is undefined)</code></pre>`],
+["jscode","Mid","Write a polyfill for <code>Array.prototype.map</code>, <code>filter</code> and <code>reduce</code>.",`<pre><code>Array.prototype.myMap = function (cb, thisArg) {
+  const out = [];
+  for (let i = 0; i &lt; this.length; i++)
+    if (i in this) out[i] = cb.call(thisArg, this[i], i, this);
+  return out;
+};
+Array.prototype.myFilter = function (cb) {
+  const out = [];
+  for (let i = 0; i &lt; this.length; i++)
+    if (i in this &amp;&amp; cb(this[i], i, this)) out.push(this[i]);
+  return out;
+};
+Array.prototype.myReduce = function (cb, init) {
+  let i = 0, acc = init;
+  if (arguments.length &lt; 2) {
+    if (!this.length) throw new TypeError('Reduce of empty array with no initial value');
+    acc = this[0]; i = 1;
+  }
+  for (; i &lt; this.length; i++) acc = cb(acc, this[i], i, this);
+  return acc;
+};</code></pre>`],
+["jscode","Senior","Write a polyfill for <code>Promise.all</code>.",`<pre><code>function promiseAll(list) {
+  return new Promise((resolve, reject) => {
+    const results = [];
+    let done = 0;
+    if (list.length === 0) return resolve([]);
+    list.forEach((p, i) => {
+      Promise.resolve(p).then(v => {
+        results[i] = v;               // keep original order
+        if (++done === list.length) resolve(results);
+      }, reject);                     // first rejection wins
+    });
+  });
+}</code></pre>`],
+["jscode","Mid","Write <code>Function.prototype.bind</code> and a throttle function.",`<pre><code>Function.prototype.myBind = function (ctx, ...pre) {
+  const fn = this;
+  return function (...args) { return fn.apply(ctx, [...pre, ...args]); };
+};
+
+function throttle(fn, ms) {
+  let last = 0;
+  return (...args) => {
+    const now = Date.now();
+    if (now - last >= ms) { last = now; fn(...args); }
+  };
+}</code></pre>`],
+["jscode","Senior","Implement a deep clone and a deep equal.",`<pre><code>function deepClone(v, seen = new WeakMap()) {
+  if (v === null || typeof v !== 'object') return v;
+  if (v instanceof Date) return new Date(v);
+  if (seen.has(v)) return seen.get(v);        // handle cycles
+  const out = Array.isArray(v) ? [] : {};
+  seen.set(v, out);
+  for (const k of Object.keys(v)) out[k] = deepClone(v[k], seen);
+  return out;
+}
+
+function deepEqual(a, b) {
+  if (a === b) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || !a || !b) return false;
+  const ka = Object.keys(a), kb = Object.keys(b);
+  return ka.length === kb.length &amp;&amp; ka.every(k => deepEqual(a[k], b[k]));
+}</code></pre>`],
+["jscode","Mid","Flatten a nested array without <code>.flat()</code>.",`<pre><code>function flatten(arr, depth = Infinity) {
+  return arr.reduce((acc, x) =>
+    Array.isArray(x) &amp;&amp; depth > 0
+      ? acc.concat(flatten(x, depth - 1))
+      : acc.concat([x]), []);
+}
+flatten([1, [2, [3, [4]]]]);     // [1,2,3,4]
+flatten([1, [2, [3, [4]]]], 1);  // [1,2,[3,[4]]]</code></pre>`],
+["jscode","Senior","Implement an event emitter (pub/sub).",`<pre><code>class Emitter {
+  #map = new Map();
+  on(evt, fn) {
+    if (!this.#map.has(evt)) this.#map.set(evt, new Set());
+    this.#map.get(evt).add(fn);
+    return () => this.off(evt, fn);        // unsubscribe
+  }
+  off(evt, fn) { this.#map.get(evt)?.delete(fn); }
+  once(evt, fn) {
+    const off = this.on(evt, (...a) => { off(); fn(...a); });
+  }
+  emit(evt, ...args) { this.#map.get(evt)?.forEach(fn => fn(...args)); }
+}</code></pre>`],
+["jscode","Senior","Write a fetch wrapper with retry, timeout and exponential backoff.",`<pre><code>async function fetchRetry(url, opts = {}, retries = 3, timeout = 5000) {
+  for (let attempt = 0; ; attempt++) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeout);
+    try {
+      const res = await fetch(url, { ...opts, signal: ctrl.signal });
+      if (res.status >= 500 &amp;&amp; attempt &lt; retries) throw new Error('retryable');
+      return res;
+    } catch (err) {
+      if (attempt >= retries) throw err;
+      await new Promise(r => setTimeout(r, 2 ** attempt * 300 + Math.random() * 100));
+    } finally { clearTimeout(timer); }
+  }
+}</code></pre><p>Only retry idempotent requests (GET) or ones with an idempotency key.</p>`],
+["jscode","Mid","Curry a function: <code>sum(1)(2)(3)</code>.",`<pre><code>function curry(fn) {
+  return function c(...args) {
+    return args.length >= fn.length
+      ? fn.apply(this, args)
+      : (...more) => c.apply(this, [...args, ...more]);
+  };
+}
+const add3 = curry((a, b, c) => a + b + c);
+add3(1)(2)(3); add3(1, 2)(3); // 6</code></pre>`],
+["jscode","Mid","Memoize a function.",`<pre><code>function memoize(fn) {
+  const cache = new Map();
+  return (...args) => {
+    const key = JSON.stringify(args);
+    if (!cache.has(key)) cache.set(key, fn(...args));
+    return cache.get(key);
+  };
+}</code></pre>`],
+
+// ---------- REACT CODING ----------
+["reactcode","Mid","Write a <code>useFetch</code> hook that handles loading, errors and race conditions.",`<pre><code>function useFetch(url) {
+  const [state, setState] = useState({ data: null, error: null, loading: true });
+  useEffect(() => {
+    const ctrl = new AbortController();
+    setState(s => ({ ...s, loading: true }));
+    fetch(url, { signal: ctrl.signal })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => setState({ data, error: null, loading: false }))
+      .catch(err => {
+        if (err.name !== 'AbortError') setState({ data: null, error: err, loading: false });
+      });
+    return () => ctrl.abort();   // cancels stale request when url changes
+  }, [url]);
+  return state;
+}</code></pre><p class="tip"><b>Follow-up:</b> in real apps prefer TanStack Query (caching, retries, dedupe) or Server Components.</p>`],
+["reactcode","Mid","Build a debounced search box that calls an API.",`<pre><code>function Search() {
+  const [q, setQ] = useState('');
+  const debounced = useDebounce(q, 300);
+  const [results, setResults] = useState([]);
+
+  useEffect(() => {
+    if (!debounced) return setResults([]);
+    const ctrl = new AbortController();
+    fetch('/api/search?q=' + encodeURIComponent(debounced), { signal: ctrl.signal })
+      .then(r => r.json()).then(setResults).catch(() => {});
+    return () => ctrl.abort();
+  }, [debounced]);
+
+  return (&lt;&gt;
+    &lt;input value={q} onChange={e => setQ(e.target.value)} aria-label="Search" /&gt;
+    &lt;ul&gt;{results.map(r => &lt;li key={r.id}&gt;{r.name}&lt;/li&gt;)}&lt;/ul&gt;
+  &lt;/&gt;);
+}</code></pre>`],
+["reactcode","Mid","Build a Todo list with add, toggle, delete and filter.",`<pre><code>function Todos() {
+  const [todos, setTodos] = useState([]);
+  const [text, setText] = useState('');
+  const [filter, setFilter] = useState('all');
+
+  const add = e => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    setTodos(t => [...t, { id: crypto.randomUUID(), text, done: false }]);
+    setText('');
+  };
+  const toggle = id => setTodos(t => t.map(x => x.id === id ? { ...x, done: !x.done } : x));
+  const remove = id => setTodos(t => t.filter(x => x.id !== id));
+  const visible = todos.filter(t =>
+    filter === 'all' ? true : filter === 'done' ? t.done : !t.done);
+
+  return (&lt;form onSubmit={add}&gt;
+    &lt;input value={text} onChange={e => setText(e.target.value)} /&gt;
+    &lt;button&gt;Add&lt;/button&gt;
+    {['all','active','done'].map(f =>
+      &lt;button type="button" key={f} onClick={() => setFilter(f)}&gt;{f}&lt;/button&gt;)}
+    &lt;ul&gt;{visible.map(t => &lt;li key={t.id}&gt;
+      &lt;input type="checkbox" checked={t.done} onChange={() => toggle(t.id)} /&gt;
+      {t.text} &lt;button type="button" onClick={() => remove(t.id)}&gt;x&lt;/button&gt;
+    &lt;/li&gt;)}&lt;/ul&gt;
+  &lt;/form&gt;);
+}</code></pre><p>Interviewers watch for immutable updates, stable keys and derived (not duplicated) state.</p>`],
+["reactcode","Mid","Build a paginated / infinite-scroll list.",`<pre><code>function Feed() {
+  const [items, setItems] = useState([]);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const sentinel = useRef(null);
+
+  useEffect(() => {
+    const io = new IntersectionObserver(async ([entry]) => {
+      if (!entry.isIntersecting || !hasMore) return;
+      const res = await fetch('/api/posts?cursor=' + (cursor ?? ''));
+      const { data, next } = await res.json();
+      setItems(x => [...x, ...data]); setCursor(next); setHasMore(!!next);
+    });
+    if (sentinel.current) io.observe(sentinel.current);
+    return () => io.disconnect();
+  }, [cursor, hasMore]);
+
+  return (&lt;&gt;{items.map(p => &lt;Post key={p.id} {...p} /&gt;)}&lt;div ref={sentinel} /&gt;&lt;/&gt;);
+}</code></pre>`],
+["reactcode","Senior","Write a protected login form in Next.js with a Server Action and <code>useActionState</code>.",`<pre><code>// app/login/actions.ts
+'use server';
+import { z } from 'zod';
+const Schema = z.object({ email: z.string().email(), password: z.string().min(8) });
+
+export async function login(prev, formData) {
+  const parsed = Schema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: 'Enter a valid email and password.' };
+  const res = await fetch(process.env.API_URL + '/auth/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(parsed.data),
+  });
+  if (!res.ok) return { error: 'Invalid email or password.' };
+  const { refresh_token } = await res.json();
+  (await cookies()).set('rt', refresh_token, { httpOnly: true, secure: true, sameSite: 'lax', path: '/' });
+  redirect('/dashboard');
+}
+
+// app/login/page.tsx
+'use client';
+export default function LoginPage() {
+  const [state, action, pending] = useActionState(login, null);
+  return (&lt;form action={action}&gt;
+    &lt;input name="email" type="email" autoComplete="email" required /&gt;
+    &lt;input name="password" type="password" autoComplete="current-password" required /&gt;
+    {state?.error &amp;&amp; &lt;p role="alert"&gt;{state.error}&lt;/p&gt;}
+    &lt;button disabled={pending}&gt;{pending ? 'Signing in…' : 'Sign in'}&lt;/button&gt;
+  &lt;/form&gt;);
+}</code></pre>`],
+["reactcode","Senior","Write Next.js middleware that protects <code>/dashboard</code> routes.",`<pre><code>// middleware.ts
+import { NextResponse } from 'next/server';
+import { jwtVerify } from 'jose';
+
+const key = new TextEncoder().encode(process.env.JWT_SECRET);
+
+export async function middleware(req) {
+  const token = req.cookies.get('session')?.value;
+  try {
+    if (!token) throw new Error('no token');
+    await jwtVerify(token, key, { issuer: 'myapp' });
+    return NextResponse.next();
+  } catch {
+    const url = new URL('/login', req.url);
+    url.searchParams.set('next', req.nextUrl.pathname);
+    return NextResponse.redirect(url);
+  }
+}
+export const config = { matcher: ['/dashboard/:path*'] };</code></pre><p class="tip"><b>Follow-up:</b> middleware is a first gate only; verify the session again where data is read.</p>`],
+["reactcode","Senior","Implement a simple global store with <code>useSyncExternalStore</code>.",`<pre><code>function createStore(initial) {
+  let state = initial;
+  const subs = new Set();
+  return {
+    get: () => state,
+    set: fn => { state = fn(state); subs.forEach(s => s()); },
+    subscribe: cb => { subs.add(cb); return () => subs.delete(cb); },
+  };
+}
+const cart = createStore({ items: [] });
+
+function useStore(store, selector) {
+  return useSyncExternalStore(store.subscribe, () => selector(store.get()));
+}
+// const count = useStore(cart, s => s.items.length);</code></pre><p>This is the core idea behind Zustand.</p>`],
+["reactcode","Mid","Build an accessible modal component.",`<pre><code>function Modal({ open, onClose, title, children }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (open &amp;&amp; !d.open) d.showModal();   // native focus trap + Esc
+    if (!open &amp;&amp; d.open) d.close();
+  }, [open]);
+  return createPortal(
+    &lt;dialog ref={ref} onClose={onClose} aria-labelledby="m-title"&gt;
+      &lt;h2 id="m-title"&gt;{title}&lt;/h2&gt;{children}
+      &lt;button onClick={onClose}&gt;Close&lt;/button&gt;
+    &lt;/dialog&gt;, document.body);
+}</code></pre>`],
+
+// ---------- PYTHON / BACKEND CODING ----------
+["pycode","Mid","Write FastAPI signup and login endpoints with Argon2 and JWT.",`<pre><code>from datetime import datetime, timedelta, timezone
+from fastapi import APIRouter, Depends, HTTPException, Response
+from argon2 import PasswordHasher
+import jwt, secrets, hashlib
+
+router = APIRouter(prefix="/auth")
+ph = PasswordHasher()
+SECRET, ALG = settings.jwt_secret, "HS256"
+
+def make_access(user_id: str) -> str:
+    now = datetime.now(timezone.utc)
+    return jwt.encode({"sub": user_id, "iat": now, "exp": now + timedelta(minutes=15),
+                       "iss": "myapp"}, SECRET, algorithm=ALG)
+
+@router.post("/signup", status_code=202)
+async def signup(body: SignupIn, db=Depends(get_db)):
+    if not await db.users.exists(body.email):
+        user = await db.users.create(email=body.email, password_hash=ph.hash(body.password))
+        await send_verification(user)          # queued job
+    return {"message": "Check your inbox to verify your email."}   # same reply either way
+
+@router.post("/login")
+async def login(body: LoginIn, response: Response, db=Depends(get_db)):
+    user = await db.users.by_email(body.email)
+    try:
+        ph.verify(user.password_hash if user else DUMMY_HASH, body.password)
+    except Exception:
+        raise HTTPException(401, "Invalid email or password")
+    if not user or not user.email_verified:
+        raise HTTPException(401, "Invalid email or password")
+    refresh = secrets.token_urlsafe(32)
+    await db.refresh_tokens.create(user_id=user.id,
+        token_hash=hashlib.sha256(refresh.encode()).hexdigest(),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=14))
+    response.set_cookie("rt", refresh, httponly=True, secure=True, samesite="lax",
+                        max_age=14*24*3600, path="/auth")
+    return {"access_token": make_access(str(user.id)), "token_type": "bearer"}</code></pre><p>Verifying against a dummy hash when the user doesn't exist keeps response time equal, so attackers can't detect valid emails by timing.</p>`],
+["pycode","Mid","Write the forgot-password and reset-password endpoints.",`<pre><code>RESET_TTL = timedelta(minutes=30)
+
+@router.post("/forgot-password", status_code=202)
+async def forgot(body: EmailIn, db=Depends(get_db), _=Depends(rate_limit("forgot", 5, 3600))):
+    user = await db.users.by_email(body.email)
+    if user:
+        token = secrets.token_urlsafe(32)
+        await db.reset_tokens.delete_for(user.id)
+        await db.reset_tokens.create(user_id=user.id,
+            token_hash=sha256(token), expires_at=now() + RESET_TTL)
+        await queue.send("email.reset", {"to": user.email,
+            "link": f"{settings.frontend_url}/reset?token={token}"})
+    return {"message": "If an account exists, we sent a reset link."}
+
+@router.post("/reset-password")
+async def reset(body: ResetIn, db=Depends(get_db)):
+    row = await db.reset_tokens.by_hash(sha256(body.token))
+    if not row or row.expires_at &lt; now():
+        raise HTTPException(400, "This link is invalid or has expired.")
+    async with db.transaction():
+        await db.users.set_password(row.user_id, ph.hash(body.new_password))
+        await db.reset_tokens.delete_for(row.user_id)
+        await db.refresh_tokens.revoke_all(row.user_id)    # log out everywhere
+    await queue.send("email.password_changed", {"user_id": row.user_id})
+    return {"message": "Password updated. Please sign in."}</code></pre><p>The link is built from a configured <code>frontend_url</code>, never from the request's Host header (host header injection).</p>`],
+["pycode","Mid","Write a FastAPI dependency that gets the current user from a JWT and checks a role.",`<pre><code>from fastapi.security import HTTPBearer
+bearer = HTTPBearer()
+
+async def current_user(cred=Depends(bearer), db=Depends(get_db)) -> User:
+    try:
+        payload = jwt.decode(cred.credentials, SECRET, algorithms=["HS256"],
+                             issuer="myapp", options={"require": ["exp", "sub"]})
+    except jwt.PyJWTError:
+        raise HTTPException(401, "Invalid or expired token",
+                            headers={"WWW-Authenticate": "Bearer"})
+    user = await db.users.get(payload["sub"])
+    if not user or not user.is_active:
+        raise HTTPException(401)
+    return user
+
+def require_role(*roles):
+    async def check(user: User = Depends(current_user)):
+        if user.role not in roles:
+            raise HTTPException(403, "Not allowed")
+        return user
+    return check
+
+@app.delete("/admin/users/{uid}")
+async def delete_user(uid: str, admin=Depends(require_role("admin"))): ...</code></pre>`],
+["pycode","Senior","Implement a Redis sliding-window rate limiter.",`<pre><code>import time, uuid
+async def allow(redis, key: str, limit: int, window_s: int) -> bool:
+    now = time.time()
+    pipe = redis.pipeline()
+    pipe.zremrangebyscore(key, 0, now - window_s)       # drop old hits
+    pipe.zadd(key, {str(uuid.uuid4()): now})
+    pipe.zcard(key)
+    pipe.expire(key, window_s)
+    _, _, count, _ = await pipe.execute()
+    return count &lt;= limit
+
+def rate_limit(name, limit, window):
+    async def dep(request: Request):
+        key = f"rl:{name}:{request.client.host}"
+        if not await allow(redis, key, limit, window):
+            raise HTTPException(429, "Too many requests", headers={"Retry-After": str(window)})
+    return dep</code></pre>`],
+["pycode","Mid","Write a retry decorator with exponential backoff (sync and async).",`<pre><code>import asyncio, functools, random, time
+
+def retry(times=3, base=0.3, exceptions=(Exception,)):
+    def deco(fn):
+        if asyncio.iscoroutinefunction(fn):
+            @functools.wraps(fn)
+            async def aw(*a, **kw):
+                for i in range(times):
+                    try: return await fn(*a, **kw)
+                    except exceptions:
+                        if i == times - 1: raise
+                        await asyncio.sleep(base * 2**i + random.random() / 10)
+            return aw
+        @functools.wraps(fn)
+        def w(*a, **kw):
+            for i in range(times):
+                try: return fn(*a, **kw)
+                except exceptions:
+                    if i == times - 1: raise
+                    time.sleep(base * 2**i)
+        return w
+    return deco</code></pre>`],
+["pycode","Mid","Fetch many URLs concurrently with a concurrency limit.",`<pre><code>import asyncio, httpx
+
+async def fetch_all(urls, limit=10):
+    sem = asyncio.Semaphore(limit)
+    async with httpx.AsyncClient(timeout=10) as client:
+        async def one(u):
+            async with sem:
+                r = await client.get(u)
+                return u, r.status_code
+        return await asyncio.gather(*(one(u) for u in urls), return_exceptions=True)</code></pre>`],
+["pycode","Mid","Write a context manager that times a block, both class-based and with <code>contextlib</code>.",`<pre><code>import time
+from contextlib import contextmanager
+
+class Timer:
+    def __enter__(self): self.t = time.perf_counter(); return self
+    def __exit__(self, *exc): self.elapsed = time.perf_counter() - self.t
+
+@contextmanager
+def timer(label):
+    t = time.perf_counter()
+    try: yield
+    finally: print(label, round(time.perf_counter() - t, 3))
+
+with timer("query"): run_query()</code></pre>`],
+["pycode","Senior","Write SQL: second highest salary, top 3 per department, and users with no orders.",`<pre><code>-- 2nd highest salary
+SELECT MAX(salary) FROM employees
+WHERE salary &lt; (SELECT MAX(salary) FROM employees);
+
+-- top 3 earners per department
+SELECT * FROM (
+  SELECT e.*, DENSE_RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rnk
+  FROM employees e
+) t WHERE rnk &lt;= 3;
+
+-- users who never ordered
+SELECT u.id, u.email FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+WHERE o.id IS NULL;
+
+-- duplicate emails
+SELECT email, COUNT(*) FROM users GROUP BY email HAVING COUNT(*) > 1;</code></pre>`],
+["pycode","Senior","Upload a file directly from the browser to Azure Blob using a SAS URL (Python backend).",`<pre><code>from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
+
+svc = BlobServiceClient(settings.blob_url, credential=DefaultAzureCredential())
+
+@app.post("/uploads/sas")
+async def upload_url(name: str, user=Depends(current_user)):
+    blob = f"{user.id}/{uuid4()}-{secure_filename(name)}"
+    start, expiry = now(), now() + timedelta(minutes=10)
+    key = svc.get_user_delegation_key(start, expiry)
+    sas = generate_blob_sas(svc.account_name, "uploads", blob, user_delegation_key=key,
+                            permission=BlobSasPermissions(create=True, write=True),
+                            expiry=expiry)
+    return {"url": f"{settings.blob_url}/uploads/{blob}?{sas}"}
+# Browser: PUT file to that url with header x-ms-blob-type: BlockBlob</code></pre><p>The API never streams the file itself, so it stays fast; managed identity means no storage key in code.</p>`],
+
+// ---------- PYTHON CODING (core) ----------
+["pycore","Mid","Predict the output: mutable default, late-binding lambdas, list aliasing.",`<pre><code>def f(x, acc=[]):
+    acc.append(x); return acc
+f(1); print(f(2))                  # [1, 2]  default list is shared
+
+fns = [lambda: i for i in range(3)]
+print([fn() for fn in fns])        # [2, 2, 2]  i looked up at call time
+fns = [lambda i=i: i for i in range(3)]   # fix -> [0, 1, 2]
+
+grid = [[0] * 3] * 3
+grid[0][0] = 1
+print(grid)                        # [[1,0,0],[1,0,0],[1,0,0]] same inner list 3x
+grid = [[0] * 3 for _ in range(3)] # fix</code></pre>`],
+["pycore","Mid","Predict the output: identity, floats, bools, tuples.",`<pre><code>a = 256; b = 256; print(a is b)    # True  (small ints -5..256 are cached)
+a = 1000; b = 1000; a is b         # may be False: never use 'is' for numbers
+print(0.1 + 0.2 == 0.3)            # False -> use math.isclose()
+print(True + True)                 # 2   bool is a subclass of int
+t = (1, [2]); t[1].append(3)       # works: tuple holds a reference to a mutable list
+t[1] += [4]                        # TypeError raised, BUT list is still extended!
+print({1: 'a', True: 'b'})         # {1: 'b'}  1 == True and same hash
+x = [1, 2, 3]; y = x; y += [4]; print(x)  # [1, 2, 3, 4]  += mutates in place</code></pre>`],
+["pycore","Mid","Predict the output: scope, <code>global</code>/<code>nonlocal</code> and closures.",`<pre><code>x = 10
+def f():
+    print(x)
+    x = 5          # makes x local to the WHOLE function
+f()                # UnboundLocalError
+
+def counter():
+    n = 0
+    def inc():
+        nonlocal n  # without this: UnboundLocalError
+        n += 1; return n
+    return inc</code></pre><p>Python resolves names with LEGB: Local, Enclosing, Global, Built-in.</p>`],
+["pycore","Junior","Swap two variables, find the missing number in 1..n, and find duplicates.",`<pre><code>a, b = b, a                                  # tuple unpacking swap
+
+def missing(nums, n):                        # O(n), O(1)
+    return n * (n + 1) // 2 - sum(nums)
+
+def duplicates(nums):
+    seen, dup = set(), set()
+    for x in nums:
+        (dup if x in seen else seen).add(x)
+    return list(dup)
+
+from collections import Counter
+[k for k, v in Counter(nums).items() if v > 1]   # one-liner</code></pre>`],
+["pycore","Junior","Sort a dict by value, sort a list of dicts by multiple keys, merge dicts.",`<pre><code>scores = {"a": 3, "b": 1, "c": 2}
+dict(sorted(scores.items(), key=lambda kv: kv[1], reverse=True))
+
+users = [{"name": "Ana", "age": 30}, {"name": "Bo", "age": 25}, {"name": "Cy", "age": 30}]
+sorted(users, key=lambda u: (-u["age"], u["name"]))   # age desc, then name asc
+from operator import itemgetter
+sorted(users, key=itemgetter("age"))
+
+merged = {**d1, **d2}         # d2 wins on conflicts
+merged = d1 | d2              # Python 3.9+
+max(scores, key=scores.get)   # key with highest value -> 'a'</code></pre>`],
+["pycore","Junior","List/dict/set comprehensions: squares of evens, invert a dict, flatten a matrix.",`<pre><code>[x * x for x in nums if x % 2 == 0]
+{v: k for k, v in d.items()}                  # invert dict
+[x for row in matrix for x in row]            # flatten 2D
+{w.lower() for w in words}                    # unique lowercase
+{w: len(w) for w in words}
+list(zip(*matrix))                            # transpose</code></pre>`],
+["pycore","Mid","Flatten an arbitrarily nested list (recursive and with a generator).",`<pre><code>def flatten(xs):
+    out = []
+    for x in xs:
+        if isinstance(x, list): out.extend(flatten(x))
+        else: out.append(x)
+    return out
+
+def iflatten(xs):                 # lazy version
+    for x in xs:
+        if isinstance(x, (list, tuple)): yield from iflatten(x)
+        else: yield x
+
+list(iflatten([1, [2, [3, (4, 5)]]]))  # [1, 2, 3, 4, 5]</code></pre>`],
+["pycore","Mid","Split a list into chunks of size n; sliding windows.",`<pre><code>def chunks(xs, n):
+    return [xs[i:i + n] for i in range(0, len(xs), n)]
+
+from itertools import batched      # Python 3.12+
+list(batched(range(7), 3))         # [(0,1,2), (3,4,5), (6,)]
+
+def windows(xs, k):
+    return [xs[i:i + k] for i in range(len(xs) - k + 1)]</code></pre>`],
+["pycore","Junior","Armstrong number, sum of digits, reverse an integer, GCD/LCM.",`<pre><code>def is_armstrong(n):
+    d = str(n); return n == sum(int(c) ** len(d) for c in d)   # 153 -> True
+
+def digit_sum(n): return sum(map(int, str(abs(n))))
+
+def reverse_int(n):
+    sign = -1 if n &lt; 0 else 1
+    return sign * int(str(abs(n))[::-1])
+
+def gcd(a, b):
+    while b: a, b = b, a % b
+    return a
+def lcm(a, b): return a * b // gcd(a, b)     # or math.gcd / math.lcm</code></pre>`],
+["pycore","Mid","Write a generator for an infinite Fibonacci sequence and take the first 10.",`<pre><code>from itertools import islice
+def fib():
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b
+
+list(islice(fib(), 10))   # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]</code></pre>`],
+["pycore","Mid","Write a custom iterator class (<code>__iter__</code>/<code>__next__</code>).",`<pre><code>class Countdown:
+    def __init__(self, start): self.cur = start
+    def __iter__(self): return self
+    def __next__(self):
+        if self.cur &lt; 0: raise StopIteration
+        self.cur -= 1
+        return self.cur + 1
+
+for n in Countdown(3): print(n)   # 3 2 1 0</code></pre><p>An <b>iterable</b> has <code>__iter__</code>; an <b>iterator</b> also has <code>__next__</code> and is consumed once.</p>`],
+["pycore","Mid","Read a huge log file and count status codes without loading it into memory.",`<pre><code>from collections import Counter
+
+def status_counts(path):
+    counts = Counter()
+    with open(path, encoding="utf-8") as f:
+        for line in f:                       # file objects stream line by line
+            parts = line.split()
+            if len(parts) > 8: counts[parts[8]] += 1
+    return counts
+
+# top 5 IPs
+def top_ips(path, k=5):
+    with open(path) as f:
+        return Counter(line.split(maxsplit=1)[0] for line in f).most_common(k)</code></pre>`],
+["pycore","Mid","Parse JSON/CSV and group records (e.g. total sales per region).",`<pre><code>import csv, json
+from collections import defaultdict
+
+def sales_by_region(path):
+    totals = defaultdict(float)
+    with open(path, newline="") as f:
+        for row in csv.DictReader(f):
+            totals[row["region"]] += float(row["amount"])
+    return dict(totals)
+
+data = json.loads('{"users": [{"id": 1, "tags": ["a"]}]}')
+json.dumps(data, indent=2, default=str)    # default=str handles datetime</code></pre>`],
+["pycore","Mid","Validate an email and extract all numbers / URLs with regex.",`<pre><code>import re
+EMAIL = re.compile(r"^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+$")
+bool(EMAIL.match("dev@example.com"))           # True
+
+re.findall(r"-?\\d+(?:\\.\\d+)?", "a1 b-2.5 c30")  # ['1', '-2.5', '30']
+re.findall(r"https?://\\S+", text)
+re.sub(r"\\s+", " ", text).strip()             # collapse whitespace</code></pre><p class="tip"><b>Follow-up:</b> real email validation is sending a verification link; regex only catches typos.</p>`],
+["pycore","Mid","OOP: write a class with <code>@property</code>, <code>@classmethod</code>, <code>@staticmethod</code> and dunder methods.",`<pre><code>class Money:
+    def __init__(self, amount, currency="INR"):
+        self.amount, self.currency = amount, currency
+
+    @property
+    def amount(self): return self._amount
+    @amount.setter
+    def amount(self, v):
+        if v &lt; 0: raise ValueError("amount must be >= 0")
+        self._amount = v
+
+    @classmethod
+    def from_str(cls, s):             # alternative constructor: "100 USD"
+        amt, cur = s.split(); return cls(float(amt), cur)
+
+    @staticmethod
+    def round2(x): return round(x, 2)
+
+    def __add__(self, other):
+        if self.currency != other.currency: raise ValueError("currency mismatch")
+        return Money(self.amount + other.amount, self.currency)
+    def __eq__(self, o): return (self.amount, self.currency) == (o.amount, o.currency)
+    def __repr__(self): return f"Money({self.amount!r}, {self.currency!r})"</code></pre>`],
+["pycore","Mid","Abstract base classes and polymorphism: payment processors.",`<pre><code>from abc import ABC, abstractmethod
+
+class PaymentGateway(ABC):
+    @abstractmethod
+    def charge(self, amount: float) -> str: ...
+
+class Stripe(PaymentGateway):
+    def charge(self, amount): return f"stripe:{amount}"
+class Razorpay(PaymentGateway):
+    def charge(self, amount): return f"razorpay:{amount}"
+
+def checkout(gw: PaymentGateway, amt): return gw.charge(amt)
+PaymentGateway()   # TypeError: can't instantiate abstract class</code></pre><p>Also know <code>typing.Protocol</code> for duck-typed interfaces without inheritance.</p>`],
+["pycore","Senior","Implement a Singleton three ways.",`<pre><code># 1. Module-level instance (most Pythonic)
+settings = Settings()
+
+# 2. __new__
+class Singleton:
+    _inst = None
+    def __new__(cls, *a, **kw):
+        if cls._inst is None: cls._inst = super().__new__(cls)
+        return cls._inst
+
+# 3. Metaclass
+class SingletonMeta(type):
+    _instances = {}
+    def __call__(cls, *a, **kw):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*a, **kw)
+        return cls._instances[cls]
+class DB(metaclass=SingletonMeta): ...</code></pre><p>In FastAPI you'd usually use <code>@lru_cache</code> on a <code>get_settings()</code> dependency instead.</p>`],
+["pycore","Mid","Write a decorator that takes arguments, and a class-based decorator.",`<pre><code>import functools
+
+def repeat(times):                    # decorator factory
+    def deco(fn):
+        @functools.wraps(fn)
+        def wrapper(*a, **kw):
+            return [fn(*a, **kw) for _ in range(times)]
+        return wrapper
+    return deco
+
+@repeat(3)
+def hi(): return "hi"                  # ['hi', 'hi', 'hi']
+
+class CountCalls:
+    def __init__(self, fn):
+        functools.update_wrapper(self, fn); self.fn, self.calls = fn, 0
+    def __call__(self, *a, **kw):
+        self.calls += 1; return self.fn(*a, **kw)</code></pre>`],
+["pycore","Mid","Implement your own <code>lru_cache</code>-style memoize decorator with a TTL.",`<pre><code>import functools, time
+
+def ttl_cache(seconds):
+    def deco(fn):
+        cache = {}
+        @functools.wraps(fn)
+        def wrapper(*args):
+            now = time.monotonic()
+            if args in cache and now - cache[args][1] &lt; seconds:
+                return cache[args][0]
+            val = fn(*args); cache[args] = (val, now); return val
+        return wrapper
+    return deco
+
+@functools.lru_cache(maxsize=128)   # built-in: args must be hashable
+def slow_square(n): return n * n</code></pre>`],
+["pycore","Mid","<code>map</code>, <code>filter</code>, <code>reduce</code>, <code>zip</code>, <code>enumerate</code>, <code>any</code>/<code>all</code> in one task.",`<pre><code>from functools import reduce
+nums = [1, 2, 3, 4, 5]
+list(map(lambda x: x * 2, nums))              # [2, 4, 6, 8, 10]
+list(filter(lambda x: x % 2, nums))           # [1, 3, 5]
+reduce(lambda a, b: a * b, nums)              # 120
+dict(zip(["a", "b"], [1, 2]))                 # {'a': 1, 'b': 2}
+for i, v in enumerate(nums, start=1): ...
+any(x > 4 for x in nums), all(x > 0 for x in nums)   # True, True</code></pre>`],
+["pycore","Senior","Thread-safe counter, and why <code>count += 1</code> isn't atomic.",`<pre><code>import threading
+from concurrent.futures import ThreadPoolExecutor
+
+class Counter:
+    def __init__(self): self.n = 0; self.lock = threading.Lock()
+    def inc(self):
+        with self.lock:         # read-modify-write must be protected
+            self.n += 1
+
+c = Counter()
+with ThreadPoolExecutor(8) as ex:
+    for _ in range(10_000): ex.submit(c.inc)
+print(c.n)   # 10000</code></pre><p>The GIL doesn't make <code>+=</code> atomic: it's several bytecodes (load, add, store) and a thread switch can happen in between.</p>`],
+["pycore","Senior","Producer–consumer with <code>asyncio.Queue</code>.",`<pre><code>import asyncio
+
+async def producer(q, n):
+    for i in range(n): await q.put(i)
+    for _ in range(3): await q.put(None)      # one stop signal per worker
+
+async def worker(name, q):
+    while (item := await q.get()) is not None:
+        await asyncio.sleep(0.1)               # simulate I/O
+        print(name, item)
+        q.task_done()
+    q.task_done()
+
+async def main():
+    q = asyncio.Queue(maxsize=10)              # back-pressure
+    async with asyncio.TaskGroup() as tg:
+        tg.create_task(producer(q, 20))
+        for i in range(3): tg.create_task(worker(f"w{i}", q))
+
+asyncio.run(main())</code></pre>`],
+["pycore","Mid","CPU-bound work: run it in parallel with processes.",`<pre><code>from concurrent.futures import ProcessPoolExecutor
+
+def is_prime(n):
+    if n &lt; 2: return False
+    return all(n % i for i in range(2, int(n ** 0.5) + 1))
+
+if __name__ == "__main__":          # required on Windows/macOS spawn
+    with ProcessPoolExecutor() as ex:
+        primes = [n for n, p in zip(nums, ex.map(is_prime, nums, chunksize=1000)) if p]</code></pre>`],
+["pycore","Mid","Custom exceptions and clean error handling (<code>try/except/else/finally</code>).",`<pre><code>class AppError(Exception): ...
+class NotFound(AppError):
+    def __init__(self, what, id): super().__init__(f"{what} {id} not found")
+
+def load(id):
+    try:
+        row = db.get(id)
+    except ConnectionError as e:
+        raise AppError("database unavailable") from e   # keep original traceback
+    else:
+        if row is None: raise NotFound("user", id)
+        return row
+    finally:
+        metrics.inc("load_attempts")</code></pre><p>Catch specific exceptions, never a bare <code>except:</code>. Python 3.11 adds <code>ExceptionGroup</code> and <code>except*</code>.</p>`],
+["pycore","Mid","Implement a Stack class with <code>min()</code> in O(1).",`<pre><code>class MinStack:
+    def __init__(self): self.s = []            # store (value, current_min)
+    def push(self, x):
+        m = min(x, self.s[-1][1]) if self.s else x
+        self.s.append((x, m))
+    def pop(self): return self.s.pop()[0]
+    def top(self): return self.s[-1][0]
+    def min(self): return self.s[-1][1]</code></pre>`],
+["pycore","Mid","Rotate a matrix 90° clockwise; spiral order traversal.",`<pre><code>def rotate(m):
+    return [list(row) for row in zip(*m[::-1])]
+
+def spiral(m):
+    out = []
+    while m:
+        out += m.pop(0)                     # top row
+        m = [list(r) for r in zip(*m)][::-1]  # rotate the rest counter-clockwise
+    return out
+spiral([[1,2,3],[4,5,6],[7,8,9]])   # [1,2,3,6,9,8,7,4,5]</code></pre>`],
+["pycore","Mid","Word frequency: top N words in a text, ignoring case and punctuation.",`<pre><code>import re
+from collections import Counter
+
+def top_words(text, n=3):
+    words = re.findall(r"[a-z']+", text.lower())
+    return Counter(words).most_common(n)
+
+top_words("The cat and the hat. The end!")   # [('the', 3), ('cat', 1), ('and', 1)]</code></pre>`],
+["pycore","Senior","Write pytest tests with fixtures, parametrize and mocking.",`<pre><code>import pytest
+from unittest.mock import patch
+
+@pytest.fixture
+def user(): return {"id": 1, "email": "a@b.com"}
+
+@pytest.mark.parametrize("s,expected", [("racecar", True), ("abc", False), ("", True)])
+def test_palindrome(s, expected):
+    assert is_palindrome(s) is expected
+
+def test_signup_sends_email(client):
+    with patch("app.auth.send_verification") as send:
+        r = client.post("/auth/signup", json={"email": "a@b.com", "password": "S3cure!pass"})
+    assert r.status_code == 202
+    send.assert_called_once()
+
+def test_bad_input_raises():
+    with pytest.raises(ValueError): Money(-1)</code></pre>`],
+["pycore","Mid","Implement binary search, bubble sort, merge sort and quicksort in Python.",`<pre><code>def merge_sort(a):
+    if len(a) &lt;= 1: return a
+    mid = len(a) // 2
+    l, r = merge_sort(a[:mid]), merge_sort(a[mid:])
+    out, i, j = [], 0, 0
+    while i &lt; len(l) and j &lt; len(r):
+        if l[i] &lt;= r[j]: out.append(l[i]); i += 1
+        else: out.append(r[j]); j += 1
+    return out + l[i:] + r[j:]                       # O(n log n), stable
+
+def quick_sort(a):
+    if len(a) &lt;= 1: return a
+    p = a[len(a) // 2]
+    return quick_sort([x for x in a if x &lt; p]) + [x for x in a if x == p] + quick_sort([x for x in a if x > p])
+
+def bubble_sort(a):
+    a = a[:]
+    for i in range(len(a)):
+        swapped = False
+        for j in range(len(a) - 1 - i):
+            if a[j] > a[j + 1]: a[j], a[j + 1] = a[j + 1], a[j]; swapped = True
+        if not swapped: break
+    return a                                          # O(n^2)</code></pre>`],
+["pycore","Mid","Check balanced brackets, count substrings, and find all permutations of a string.",`<pre><code>from itertools import permutations, combinations
+[''.join(p) for p in permutations("abc")]      # 6 strings
+list(combinations([1, 2, 3], 2))               # [(1,2),(1,3),(2,3)]
+
+def perms(s):                                   # by hand (backtracking)
+    if len(s) &lt;= 1: return [s]
+    return [c + p for i, c in enumerate(s) for p in perms(s[:i] + s[i+1:])]
+
+"banana".count("an")                            # 2 (non-overlapping)
+sum(1 for i in range(len(s)) if s.startswith("ana", i))   # overlapping count</code></pre>`],
+["pycore","Mid","<code>dataclass</code> with defaults, ordering and immutability.",`<pre><code>from dataclasses import dataclass, field
+
+@dataclass(order=True, frozen=True, slots=True)
+class Task:
+    priority: int
+    title: str = field(compare=False)
+    tags: list[str] = field(default_factory=list, compare=False)   # not tags=[]!
+
+sorted([Task(2, "b"), Task(1, "a")])   # ordered by priority
+t = Task(1, "x"); t.priority = 5       # FrozenInstanceError</code></pre>`],
+
+// ---------- DSA ----------
+["dsa","Junior","Reverse a string and check if it is a palindrome (ignore case and non-letters).",`<p><b>Approach:</b> two pointers moving inward, skipping non-alphanumerics. <b>Time</b> O(n), <b>space</b> O(1).</p><pre><code># Python
+def is_palindrome(s: str) -> bool:
+    i, j = 0, len(s) - 1
+    while i &lt; j:
+        while i &lt; j and not s[i].isalnum(): i += 1
+        while i &lt; j and not s[j].isalnum(): j -= 1
+        if s[i].lower() != s[j].lower(): return False
+        i, j = i + 1, j - 1
+    return True
+# reverse: s[::-1]
+
+// JavaScript
+const reverse = s => [...s].reverse().join('');
+function isPalindrome(s) {
+  const t = s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  let i = 0, j = t.length - 1;
+  while (i &lt; j) if (t[i++] !== t[j--]) return false;
+  return true;
+}</code></pre>`],
+["dsa","Junior","Valid anagram: are two strings anagrams?",`<p><b>Approach:</b> count characters. O(n) time, O(k) space for alphabet size k.</p><pre><code># Python
+from collections import Counter
+def is_anagram(a, b): return Counter(a) == Counter(b)
+
+// JavaScript
+function isAnagram(a, b) {
+  if (a.length !== b.length) return false;
+  const m = {};
+  for (const c of a) m[c] = (m[c] || 0) + 1;
+  for (const c of b) { if (!m[c]) return false; m[c]--; }
+  return true;
+}</code></pre>`],
+["dsa","Junior","First non-repeating character in a string.",`<p><b>Approach:</b> one pass to count, second pass to find first count of 1. O(n).</p><pre><code># Python
+from collections import Counter
+def first_unique(s):
+    c = Counter(s)
+    return next((ch for ch in s if c[ch] == 1), None)
+
+// JavaScript
+function firstUnique(s) {
+  const m = new Map();
+  for (const c of s) m.set(c, (m.get(c) || 0) + 1);
+  for (const c of s) if (m.get(c) === 1) return c;
+  return null;
+}</code></pre>`],
+["dsa","Junior","Count character / word frequency; find the most frequent character.",`<pre><code># Python
+from collections import Counter
+Counter("hello world".split())          # word counts
+Counter("banana").most_common(1)        # [('a', 3)]
+
+// JavaScript
+function mostFrequent(s) {
+  const m = {}; let best = '', max = 0;
+  for (const c of s) {
+    m[c] = (m[c] || 0) + 1;
+    if (m[c] > max) { max = m[c]; best = c; }
+  }
+  return best;
+}</code></pre>`],
+["dsa","Junior","Two Sum: return indices of two numbers adding to a target.",`<p><b>Approach:</b> hash map of value → index; for each number check if <code>target - x</code> was seen. O(n) time, O(n) space (brute force is O(n²)).</p><pre><code># Python
+def two_sum(nums, target):
+    seen = {}
+    for i, x in enumerate(nums):
+        if target - x in seen: return [seen[target - x], i]
+        seen[x] = i
+
+// JavaScript
+function twoSum(nums, target) {
+  const seen = new Map();
+  for (let i = 0; i &lt; nums.length; i++) {
+    const need = target - nums[i];
+    if (seen.has(need)) return [seen.get(need), i];
+    seen.set(nums[i], i);
+  }
+}</code></pre>`],
+["dsa","Junior","Remove duplicates from an array (keep order); remove duplicates in place from a sorted array.",`<pre><code># Python
+list(dict.fromkeys(arr))                # keeps order
+
+def dedupe_sorted(nums):                # in place, returns new length
+    k = 0
+    for x in nums:
+        if k == 0 or x != nums[k - 1]:
+            nums[k] = x; k += 1
+    return k
+
+// JavaScript
+const unique = arr => [...new Set(arr)];</code></pre>`],
+["dsa","Junior","Find the largest and second largest numbers in one pass.",`<pre><code># Python
+def top_two(nums):
+    a = b = float('-inf')
+    for x in nums:
+        if x > a: a, b = x, a
+        elif a > x > b: b = x
+    return a, b
+
+// JavaScript
+function topTwo(nums) {
+  let a = -Infinity, b = -Infinity;
+  for (const x of nums) {
+    if (x > a) { b = a; a = x; }
+    else if (x > b &amp;&amp; x !== a) b = x;
+  }
+  return [a, b];
+}</code></pre>`],
+["dsa","Junior","Move all zeroes to the end, keeping order of others.",`<p>Two pointers, in place. O(n) time, O(1) space.</p><pre><code># Python
+def move_zeroes(nums):
+    k = 0
+    for i in range(len(nums)):
+        if nums[i] != 0:
+            nums[k], nums[i] = nums[i], nums[k]; k += 1
+
+// JavaScript
+function moveZeroes(nums) {
+  let k = 0;
+  for (let i = 0; i &lt; nums.length; i++)
+    if (nums[i] !== 0) { [nums[k], nums[i]] = [nums[i], nums[k]]; k++; }
+}</code></pre>`],
+["dsa","Mid","Longest substring without repeating characters.",`<p><b>Approach:</b> sliding window with last-seen index map. O(n) time.</p><pre><code># Python
+def longest_unique(s):
+    last, start, best = {}, 0, 0
+    for i, c in enumerate(s):
+        if c in last and last[c] >= start: start = last[c] + 1
+        last[c] = i
+        best = max(best, i - start + 1)
+    return best
+
+// JavaScript
+function longestUnique(s) {
+  const last = new Map(); let start = 0, best = 0;
+  for (let i = 0; i &lt; s.length; i++) {
+    if (last.has(s[i]) &amp;&amp; last.get(s[i]) >= start) start = last.get(s[i]) + 1;
+    last.set(s[i], i);
+    best = Math.max(best, i - start + 1);
+  }
+  return best;
+}
+// "abcabcbb" -> 3</code></pre>`],
+["dsa","Mid","Valid parentheses: <code>()[]{}</code> balanced?",`<p><b>Approach:</b> stack. Push openers; on closer, top must match. O(n).</p><pre><code># Python
+def valid(s):
+    pairs, st = {')': '(', ']': '[', '}': '{'}, []
+    for c in s:
+        if c in pairs:
+            if not st or st.pop() != pairs[c]: return False
+        else: st.append(c)
+    return not st
+
+// JavaScript
+function valid(s) {
+  const pairs = { ')': '(', ']': '[', '}': '{' }, st = [];
+  for (const c of s) {
+    if (pairs[c]) { if (st.pop() !== pairs[c]) return false; }
+    else st.push(c);
+  }
+  return st.length === 0;
+}</code></pre>`],
+["dsa","Mid","Group anagrams together.",`<p><b>Approach:</b> key = sorted word (or 26-letter count tuple). O(n · k log k).</p><pre><code># Python
+from collections import defaultdict
+def group_anagrams(words):
+    g = defaultdict(list)
+    for w in words: g[''.join(sorted(w))].append(w)
+    return list(g.values())
+
+// JavaScript
+function groupAnagrams(words) {
+  const g = new Map();
+  for (const w of words) {
+    const k = [...w].sort().join('');
+    g.set(k, [...(g.get(k) || []), w]);
+  }
+  return [...g.values()];
+}</code></pre>`],
+["dsa","Mid","Longest common prefix of an array of strings.",`<pre><code># Python
+def lcp(strs):
+    if not strs: return ""
+    for i, ch in enumerate(strs[0]):
+        if any(i >= len(s) or s[i] != ch for s in strs[1:]):
+            return strs[0][:i]
+    return strs[0]
+
+// JavaScript
+function lcp(strs) {
+  if (!strs.length) return '';
+  let p = strs[0];
+  for (const s of strs) while (!s.startsWith(p)) p = p.slice(0, -1);
+  return p;
+}</code></pre>`],
+["dsa","Mid","String compression: <code>aaabbc</code> → <code>a3b2c1</code>.",`<pre><code># Python
+from itertools import groupby
+def compress(s):
+    out = ''.join(f"{k}{len(list(g))}" for k, g in groupby(s))
+    return out if len(out) &lt; len(s) else s
+
+// JavaScript
+function compress(s) {
+  let out = '';
+  for (let i = 0; i &lt; s.length; ) {
+    let j = i;
+    while (j &lt; s.length &amp;&amp; s[j] === s[i]) j++;
+    out += s[i] + (j - i);
+    i = j;
+  }
+  return out.length &lt; s.length ? out : s;
+}</code></pre>`],
+["dsa","Mid","Maximum subarray sum (Kadane's algorithm).",`<p>At each index, either extend the current subarray or start fresh. O(n), O(1).</p><pre><code># Python
+def max_subarray(nums):
+    cur = best = nums[0]
+    for x in nums[1:]:
+        cur = max(x, cur + x)
+        best = max(best, cur)
+    return best
+
+// JavaScript
+function maxSubarray(nums) {
+  let cur = nums[0], best = nums[0];
+  for (let i = 1; i &lt; nums.length; i++) {
+    cur = Math.max(nums[i], cur + nums[i]);
+    best = Math.max(best, cur);
+  }
+  return best;
+}</code></pre>`],
+["dsa","Mid","Best time to buy and sell stock (one transaction).",`<pre><code># Python
+def max_profit(prices):
+    lo, best = float('inf'), 0
+    for p in prices:
+        lo = min(lo, p)
+        best = max(best, p - lo)
+    return best
+
+// JavaScript
+function maxProfit(prices) {
+  let lo = Infinity, best = 0;
+  for (const p of prices) { lo = Math.min(lo, p); best = Math.max(best, p - lo); }
+  return best;
+}</code></pre>`],
+["dsa","Mid","Product of array except self (no division).",`<p>Prefix products left to right, then multiply by suffix products right to left. O(n), O(1) extra.</p><pre><code># Python
+def product_except_self(nums):
+    n = len(nums); out = [1] * n
+    left = 1
+    for i in range(n): out[i] = left; left *= nums[i]
+    right = 1
+    for i in range(n - 1, -1, -1): out[i] *= right; right *= nums[i]
+    return out
+
+// JavaScript
+function productExceptSelf(nums) {
+  const out = Array(nums.length).fill(1);
+  for (let i = 0, l = 1; i &lt; nums.length; i++) { out[i] = l; l *= nums[i]; }
+  for (let i = nums.length - 1, r = 1; i >= 0; i--) { out[i] *= r; r *= nums[i]; }
+  return out;
+}</code></pre>`],
+["dsa","Mid","Rotate an array right by k steps in place.",`<p>Reverse all, reverse first k, reverse the rest. O(n), O(1).</p><pre><code># Python
+def rotate(nums, k):
+    k %= len(nums)
+    def rev(i, j):
+        while i &lt; j: nums[i], nums[j] = nums[j], nums[i]; i += 1; j -= 1
+    rev(0, len(nums) - 1); rev(0, k - 1); rev(k, len(nums) - 1)
+
+// JavaScript
+function rotate(nums, k) {
+  k %= nums.length;
+  const rev = (i, j) => {
+    for (; i &lt; j; i++, j--) [nums[i], nums[j]] = [nums[j], nums[i]];
+  };
+  rev(0, nums.length - 1); rev(0, k - 1); rev(k, nums.length - 1);
+}</code></pre>`],
+["dsa","Mid","Merge overlapping intervals.",`<p>Sort by start, then extend or push. O(n log n).</p><pre><code># Python
+def merge(intervals):
+    out = []
+    for s, e in sorted(intervals):
+        if out and s &lt;= out[-1][1]: out[-1][1] = max(out[-1][1], e)
+        else: out.append([s, e])
+    return out
+
+// JavaScript
+function merge(iv) {
+  iv.sort((a, b) => a[0] - b[0]);
+  const out = [];
+  for (const [s, e] of iv) {
+    const last = out[out.length - 1];
+    if (last &amp;&amp; s &lt;= last[1]) last[1] = Math.max(last[1], e);
+    else out.push([s, e]);
+  }
+  return out;
+}</code></pre>`],
+["dsa","Mid","Merge two sorted arrays into one sorted array.",`<pre><code># Python
+def merge_sorted(a, b):
+    i = j = 0; out = []
+    while i &lt; len(a) and j &lt; len(b):
+        if a[i] &lt;= b[j]: out.append(a[i]); i += 1
+        else: out.append(b[j]); j += 1
+    return out + a[i:] + b[j:]
+
+// JavaScript
+function mergeSorted(a, b) {
+  const out = []; let i = 0, j = 0;
+  while (i &lt; a.length &amp;&amp; j &lt; b.length) out.push(a[i] &lt;= b[j] ? a[i++] : b[j++]);
+  return out.concat(a.slice(i), b.slice(j));
+}</code></pre>`],
+["dsa","Mid","Top K frequent elements.",`<p>Count, then bucket sort by frequency for O(n), or use a heap for O(n log k).</p><pre><code># Python
+from collections import Counter
+import heapq
+def top_k(nums, k):
+    return [x for x, _ in Counter(nums).most_common(k)]
+    # or: heapq.nlargest(k, cnt.keys(), key=cnt.get)
+
+// JavaScript
+function topK(nums, k) {
+  const cnt = new Map();
+  for (const x of nums) cnt.set(x, (cnt.get(x) || 0) + 1);
+  const buckets = Array(nums.length + 1).fill().map(() => []);
+  for (const [x, c] of cnt) buckets[c].push(x);
+  return buckets.flat().reverse().slice(0, k);
+}</code></pre>`],
+["dsa","Mid","3Sum: all unique triplets that sum to zero.",`<p>Sort, fix one number, two-pointer on the rest, skip duplicates. O(n²).</p><pre><code># Python
+def three_sum(nums):
+    nums.sort(); res = []
+    for i in range(len(nums) - 2):
+        if i and nums[i] == nums[i - 1]: continue
+        l, r = i + 1, len(nums) - 1
+        while l &lt; r:
+            s = nums[i] + nums[l] + nums[r]
+            if s &lt; 0: l += 1
+            elif s > 0: r -= 1
+            else:
+                res.append([nums[i], nums[l], nums[r]])
+                while l &lt; r and nums[l] == nums[l + 1]: l += 1
+                l += 1; r -= 1
+    return res</code></pre>`],
+["dsa","Mid","Binary search, and find first/last position of a target.",`<pre><code># Python
+def lower_bound(a, t):          # first index with a[i] >= t
+    lo, hi = 0, len(a)
+    while lo &lt; hi:
+        mid = (lo + hi) // 2
+        if a[mid] &lt; t: lo = mid + 1
+        else: hi = mid
+    return lo
+# first = lower_bound(a, t); last = lower_bound(a, t + 1) - 1
+
+// JavaScript
+function binarySearch(a, t) {
+  let lo = 0, hi = a.length - 1;
+  while (lo &lt;= hi) {
+    const mid = (lo + hi) >> 1;
+    if (a[mid] === t) return mid;
+    a[mid] &lt; t ? lo = mid + 1 : hi = mid - 1;
+  }
+  return -1;
+}</code></pre><p>O(log n). Only works on sorted input.</p>`],
+["dsa","Mid","Reverse a singly linked list (iterative and recursive).",`<pre><code># Python
+class Node:
+    def __init__(self, val, next=None): self.val, self.next = val, next
+
+def reverse(head):
+    prev = None
+    while head:
+        head.next, prev, head = prev, head, head.next
+    return prev
+
+def reverse_rec(head):
+    if not head or not head.next: return head
+    new_head = reverse_rec(head.next)
+    head.next.next = head; head.next = None
+    return new_head
+
+// JavaScript
+function reverse(head) {
+  let prev = null;
+  while (head) { const nxt = head.next; head.next = prev; prev = head; head = nxt; }
+  return prev;
+}</code></pre>`],
+["dsa","Mid","Detect a cycle in a linked list; find the middle node.",`<p>Floyd's fast/slow pointers. O(n), O(1).</p><pre><code># Python
+def has_cycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow, fast = slow.next, fast.next.next
+        if slow is fast: return True
+    return False
+
+def middle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow, fast = slow.next, fast.next.next
+    return slow</code></pre>`],
+["dsa","Mid","Merge two sorted linked lists.",`<pre><code># Python
+def merge_lists(a, b):
+    dummy = tail = Node(0)
+    while a and b:
+        if a.val &lt;= b.val: tail.next, a = a, a.next
+        else: tail.next, b = b, b.next
+        tail = tail.next
+    tail.next = a or b
+    return dummy.next</code></pre>`],
+["dsa","Senior","Design an LRU cache with O(1) get and put.",`<p>Hash map + doubly linked list (most recent at the end). In Python, <code>OrderedDict</code> gives this; in JS, a <code>Map</code> keeps insertion order.</p><pre><code># Python
+from collections import OrderedDict
+class LRU:
+    def __init__(self, cap): self.cap, self.d = cap, OrderedDict()
+    def get(self, k):
+        if k not in self.d: return -1
+        self.d.move_to_end(k); return self.d[k]
+    def put(self, k, v):
+        self.d[k] = v; self.d.move_to_end(k)
+        if len(self.d) > self.cap: self.d.popitem(last=False)
+
+// JavaScript
+class LRU {
+  constructor(cap) { this.cap = cap; this.m = new Map(); }
+  get(k) {
+    if (!this.m.has(k)) return -1;
+    const v = this.m.get(k); this.m.delete(k); this.m.set(k, v); return v;
+  }
+  put(k, v) {
+    this.m.delete(k); this.m.set(k, v);
+    if (this.m.size > this.cap) this.m.delete(this.m.keys().next().value);
+  }
+}</code></pre>`],
+["dsa","Mid","Implement a stack and a queue; a queue using two stacks.",`<pre><code># Python
+from collections import deque
+stack = []; stack.append(1); stack.pop()
+q = deque(); q.append(1); q.popleft()           # O(1) both ends
+
+class QueueTwoStacks:
+    def __init__(self): self.inp, self.out = [], []
+    def push(self, x): self.inp.append(x)
+    def pop(self):
+        if not self.out:
+            while self.inp: self.out.append(self.inp.pop())
+        return self.out.pop()          # amortized O(1)</code></pre><p class="tip"><b>Follow-up:</b> <code>list.pop(0)</code> and JS <code>array.shift()</code> are O(n); use deque or an index pointer.</p>`],
+["dsa","Mid","Binary tree: max depth, level order (BFS), and inorder traversal.",`<pre><code># Python
+from collections import deque
+def max_depth(root):
+    return 0 if not root else 1 + max(max_depth(root.left), max_depth(root.right))
+
+def level_order(root):
+    if not root: return []
+    res, q = [], deque([root])
+    while q:
+        level = []
+        for _ in range(len(q)):
+            n = q.popleft(); level.append(n.val)
+            if n.left: q.append(n.left)
+            if n.right: q.append(n.right)
+        res.append(level)
+    return res
+
+def inorder(root):
+    return inorder(root.left) + [root.val] + inorder(root.right) if root else []</code></pre>`],
+["dsa","Mid","Validate a binary search tree.",`<pre><code># Python
+def is_bst(node, lo=float('-inf'), hi=float('inf')):
+    if not node: return True
+    if not lo &lt; node.val &lt; hi: return False
+    return is_bst(node.left, lo, node.val) and is_bst(node.right, node.val, hi)</code></pre><p>Common mistake: only comparing a node with its direct children.</p>`],
+["dsa","Mid","Number of islands (grid DFS/BFS).",`<pre><code># Python
+def num_islands(grid):
+    R, C = len(grid), len(grid[0]); count = 0
+    def sink(r, c):
+        if 0 &lt;= r &lt; R and 0 &lt;= c &lt; C and grid[r][c] == '1':
+            grid[r][c] = '0'
+            sink(r+1, c); sink(r-1, c); sink(r, c+1); sink(r, c-1)
+    for r in range(R):
+        for c in range(C):
+            if grid[r][c] == '1': count += 1; sink(r, c)
+    return count</code></pre><p>O(R·C). For huge grids use an explicit stack to avoid recursion limits.</p>`],
+["dsa","Mid","Climbing stairs / Fibonacci with memoization and bottom-up DP.",`<pre><code># Python
+from functools import cache
+@cache
+def fib(n): return n if n &lt; 2 else fib(n - 1) + fib(n - 2)
+
+def climb(n):                   # ways using 1 or 2 steps
+    a, b = 1, 1
+    for _ in range(n): a, b = b, a + b
+    return a</code></pre><p>Naive recursion is O(2ⁿ); memoized or iterative is O(n).</p>`],
+["dsa","Senior","Coin change: minimum coins to make an amount.",`<pre><code># Python
+def coin_change(coins, amount):
+    dp = [0] + [float('inf')] * amount
+    for a in range(1, amount + 1):
+        for c in coins:
+            if c &lt;= a: dp[a] = min(dp[a], dp[a - c] + 1)
+    return dp[amount] if dp[amount] != float('inf') else -1</code></pre><p>O(amount × coins). Greedy fails for coins like [1, 3, 4] and amount 6.</p>`],
+["dsa","Senior","Kth largest element in an array.",`<p>Min-heap of size k: O(n log k). Quickselect: average O(n).</p><pre><code># Python
+import heapq
+def kth_largest(nums, k):
+    h = nums[:k]; heapq.heapify(h)
+    for x in nums[k:]:
+        if x > h[0]: heapq.heapreplace(h, x)
+    return h[0]</code></pre>`],
+["dsa","Senior","Subarray sum equals K (count).",`<p>Prefix sums in a hash map: if <code>prefix - k</code> was seen, those subarrays end here. O(n).</p><pre><code># Python
+def subarray_sum(nums, k):
+    seen, s, count = {0: 1}, 0, 0
+    for x in nums:
+        s += x
+        count += seen.get(s - k, 0)
+        seen[s] = seen.get(s, 0) + 1
+    return count</code></pre>`],
+["dsa","Junior","Big-O cheat sheet: what should you know?",`<ul><li>O(1): hash lookup, array index, stack push/pop.</li><li>O(log n): binary search, heap push/pop, balanced BST.</li><li>O(n): single loop, two pointers, sliding window.</li><li>O(n log n): good sorts (Python's Timsort, JS's sort).</li><li>O(n²): nested loops; say how you'd improve it.</li></ul><p class="tip"><b>Interview habit:</b> state brute force first, then optimise, then give time and space complexity and test edge cases (empty, one element, duplicates, negatives).</p>`]
+];
+
+
+
+const LS = "fsib-known-v1";
+let known = new Set();
+try { known = new Set(JSON.parse(localStorage.getItem(LS) || "[]")); } catch (e) {}
+const save = () => { try { localStorage.setItem(LS, JSON.stringify([...known])); } catch (e) {} };
+
+const items = Q.map(([cat, lvl, q, a], i) => ({ id: cat + "-" + i, cat, lvl, q, a, text: (q + " " + a).replace(/<[^>]+>/g, " ").toLowerCase() }));
+const state = { cat: "all", lvl: "all", term: "", hideKnown: false };
+
+const $ = s => document.querySelector(s);
+const sectionsEl = $("#sections"), catsEl = $("#cats");
+
+function renderCats() {
+  const all = [{ id: "all", name: "All topics" }, ...CATS];
+  catsEl.innerHTML = all.map(c => {
+    const list = c.id === "all" ? items : items.filter(i => i.cat === c.id);
+    const k = list.filter(i => known.has(i.id)).length;
+    const pct = list.length ? Math.round(k / list.length * 100) : 0;
+    return `<button class="cat" data-cat="${c.id}" aria-current="${state.cat === c.id}"><span>${c.name}</span><span class="n">${k}/${list.length}</span><span class="mini"><span style="width:${pct}%"></span></span></button>`;
+  }).join("") + `<a class="cat" href="#diagrams" style="text-decoration:none"><span>Architecture diagrams</span><span class="n">7</span></a>`;
+}
+
+function matches(i) {
+  if (state.cat !== "all" && i.cat !== state.cat) return false;
+  if (state.lvl !== "all" && i.lvl !== state.lvl) return false;
+  if (state.hideKnown && known.has(i.id)) return false;
+  if (state.term) return state.term.split(/\s+/).every(t => i.text.includes(t));
+  return true;
+}
+
+function renderList() {
+  let shown = 0, html = "";
+  for (const c of CATS) {
+    if (state.cat !== "all" && state.cat !== c.id) continue;
+    const list = items.filter(i => i.cat === c.id && matches(i));
+    if (!list.length) continue;
+    shown += list.length;
+    html += `<section class="section" id="sec-${c.id}"><h2>${c.name}</h2><p class="sub">${c.sub}</p>${c.id === "auth" ? '<p class="sub"><a href="#diagrams" style="color:var(--accent)">See the signup, login and reset-password diagrams</a></p>' : ""}<div class="qlist">` +
+      list.map((i, n) => `<details class="q${known.has(i.id) ? " known" : ""}" data-id="${i.id}"><summary><span class="qn">${String(n + 1).padStart(2, "0")}</span><span class="qt">${i.q}</span><span class="lvl ${i.lvl}">${i.lvl}</span></summary><div class="ans">${i.a}<div class="row-actions"><button class="mark" data-mark="${i.id}">${known.has(i.id) ? "Known ✓" : "Mark as known"}</button></div></div></details>`).join("") +
+      `</div></section>`;
+  }
+  sectionsEl.innerHTML = html || `<p class="empty">No questions match. Try a shorter search or clear the level filter.</p>`;
+  $("#st-shown").textContent = shown;
+}
+
+
+function renderStats() {
+  $("#st-total").textContent = items.length;
+  $("#st-known").textContent = known.size;
+  $("#st-bar").style.width = (known.size / items.length * 100) + "%";
+}
+
+function renderAll() { renderCats(); renderList(); renderStats(); }
+
+catsEl.addEventListener("click", e => {
+  const b = e.target.closest(".cat"); if (!b) return;
+  state.cat = b.dataset.cat; renderAll();
+  window.scrollTo({ top: $(".layout").offsetTop - 70, behavior: "smooth" });
+});
+document.querySelectorAll("[data-lvl]").forEach(b => b.addEventListener("click", () => {
+  state.lvl = b.dataset.lvl;
+  document.querySelectorAll("[data-lvl]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  renderAll();
+}));
+$("#hide-known").addEventListener("click", e => {
+  state.hideKnown = !state.hideKnown; e.currentTarget.setAttribute("aria-pressed", state.hideKnown); renderAll();
+});
+let t;
+$("#q-search").addEventListener("input", e => {
+  clearTimeout(t);
+  t = setTimeout(() => { state.term = e.target.value.trim().toLowerCase(); renderList(); }, 150);
+});
+sectionsEl.addEventListener("click", e => {
+  const b = e.target.closest("[data-mark]"); if (!b) return;
+  toggleKnown(b.dataset.mark);
+  const d = b.closest("details");
+  d.classList.toggle("known", known.has(b.dataset.mark));
+  b.textContent = known.has(b.dataset.mark) ? "Known ✓" : "Mark as known";
+  renderCats(); renderStats();
+});
+function toggleKnown(id) { known.has(id) ? known.delete(id) : known.add(id); save(); }
+
+let expanded = false;
+$("#expand-btn").addEventListener("click", e => {
+  expanded = !expanded;
+  document.querySelectorAll("details.q").forEach(d => d.open = expanded);
+  e.currentTarget.textContent = expanded ? "Collapse all" : "Expand all";
+});
+
+// Practice round
+let cur = null;
+function nextPractice() {
+  let pool = items.filter(i => matches(i) && !known.has(i.id));
+  if (!pool.length) pool = items.filter(matches);
+  if (!pool.length) pool = items;
+  cur = pool[Math.floor(Math.random() * pool.length)];
+  const c = CATS.find(c => c.id === cur.cat);
+  $("#p-meta").textContent = c.name + " · " + cur.lvl + " · " + pool.length + " left in this filter";
+  $("#p-q").innerHTML = cur.q;
+  $("#p-a").innerHTML = cur.a; $("#p-a").hidden = true;
+  $("#p-show").textContent = "Show answer";
+}
+$("#practice-btn").addEventListener("click", () => { $("#practice").hidden = false; nextPractice(); $("#practice").scrollIntoView({ behavior: "smooth", block: "center" }); });
+$("#p-show").addEventListener("click", () => { const a = $("#p-a"); a.hidden = !a.hidden; $("#p-show").textContent = a.hidden ? "Show answer" : "Hide answer"; });
+$("#p-next").addEventListener("click", nextPractice);
+$("#p-know").addEventListener("click", () => { if (cur && !known.has(cur.id)) { known.add(cur.id); save(); renderAll(); } nextPractice(); });
+$("#p-close").addEventListener("click", () => { $("#practice").hidden = true; });
+
+renderAll();
+if (location.hash === "#print") document.querySelectorAll("details.q").forEach(d => d.open = true);
+window.addEventListener("beforeprint", () => document.querySelectorAll("details.q").forEach(d => d.open = true));
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({ startOnLoad: false, theme: (location.hash !== "#print" && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "default" });
+mermaid.run({ querySelector: "pre.mermaid" }).then(() => document.body.dataset.ready = "1");
+</script>
+</body>
+</html>
