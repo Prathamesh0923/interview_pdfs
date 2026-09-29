@@ -130,7 +130,7 @@ pre code{background:none;padding:0;font-size:inherit}
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="eyebrow">Question bank · Python · SQL · PostgreSQL · React · Next.js · HTML/CSS · Azure · Auth · DSA</div>
+    <div class="eyebrow">Question bank · Python · SQL · PostgreSQL · MongoDB · Redis · React · Next.js · HTML/CSS · Azure · Auth · DSA</div>
     <h1>Full Stack Interview Bank</h1>
     <p class="lede">The questions that come up most often in full stack interviews, gathered from published 2026 interview guides and grouped by topic. Each one has a short model answer. Search, filter by level, mark what you know, or run a random practice round.</p>
     <div class="stats"><span><b id="st-total">0</b> questions</span><span><b id="st-known">0</b> marked known</span><span><b id="st-shown">0</b> shown</span></div>
@@ -315,6 +315,8 @@ const CATS = [
   {id:"pycode", name:"Backend Coding (Python / SQL)", sub:"Write the endpoint: auth, password reset, rate limiting, async, SQL queries."},
   {id:"sql", name:"SQL Queries", sub:"Write-the-query questions: joins, grouping, nth highest salary, duplicates, window functions, CTEs, running totals, upserts. PostgreSQL syntax, with sample tables and results."},
   {id:"postgres", name:"PostgreSQL", sub:"PostgreSQL concepts: data types, JSONB, index types, EXPLAIN, MVCC, VACUUM, locking, partitioning, replication, pooling, security, Python drivers, Azure."},
+  {id:"mongo", name:"MongoDB", sub:"Documents vs tables, CRUD and query operators, schema design, aggregation pipeline, indexes, transactions, replica sets, sharding, Mongoose and PyMongo, NoSQL injection."},
+  {id:"redis", name:"Redis", sub:"Data types, expiry and eviction, persistence, caching patterns, sessions, rate limiting, distributed locks, Pub/Sub and Streams, clustering, Azure Cache for Redis."},
   {id:"db", name:"Databases & APIs", sub:"SQL, indexing, transactions, REST vs GraphQL, caching."},
   {id:"auth", name:"Auth Architecture", sub:"Signup, login, email verification, password reset, sessions vs JWT, OAuth, MFA. Frequently asked as a system design round."},
   {id:"azure", name:"Azure", sub:"App Service, Functions, Entra ID, Key Vault, storage, DevOps."},
@@ -1288,6 +1290,557 @@ engine = create_engine("postgresql+psycopg://app:secret@localhost/mydb", pool_si
 with engine.begin() as conn:                                  # starts and commits a transaction
     rows = conn.execute(text("SELECT id FROM users WHERE age &gt; :age"), {"age": 30}).all()</code></pre>`],
 ["postgres","Mid","What is Azure Database for PostgreSQL Flexible Server?",`<p><b>In simple words:</b> It's Azure's managed PostgreSQL service. Azure runs the server, patches, backups and high availability, and you use it like normal Postgres.</p><ul><li><b>Compute tiers:</b> Burstable (dev/test), General Purpose, Memory Optimized; you can scale up or down.</li><li><b>High availability:</b> optional zone-redundant standby with automatic failover.</li><li><b>Backups:</b> automatic, with point-in-time restore (7–35 days).</li><li><b>Read replicas</b> for scaling reads, and built-in <b>PgBouncer</b>.</li><li><b>Security:</b> private access (VNet integration or private endpoint), firewall rules, TLS, and <b>Microsoft Entra ID authentication</b>, so the app can connect with a managed identity instead of a password.</li><li><b>Extensions:</b> allow them in server parameters (for example pg_stat_statements, pgvector, PostGIS).</li></ul>`],
+// ---------- MongoDB ----------
+["mongo","Junior","What is MongoDB? How do database, collection and document compare to SQL?",`<p><b>In simple words:</b> MongoDB is a NoSQL database that stores data as JSON-like documents instead of rows in tables. Each document can have its own shape, and related data can live inside one document.</p><ul><li><b>Database</b> = database</li><li><b>Collection</b> = table</li><li><b>Document</b> = row</li><li><b>Field</b> = column</li><li><b>_id</b> = primary key (added automatically)</li><li><b>Embedded document / array</b> = what would be a separate joined table in SQL</li></ul><pre><code>// One document in the "users" collection
+{
+  _id: ObjectId("66f1c2a9e4b0a1b2c3d4e5f6"),   // unique id, created automatically
+  name: "Ana",                                  // simple field
+  email: "ana@example.com",
+  address: { city: "Pune", pin: "411001" },     // embedded document (no join needed)
+  skills: ["python", "react"]                   // array field
+}</code></pre>`],
+["mongo","Mid","When would you choose MongoDB over PostgreSQL, and when not?",`<p><b>In simple words:</b> Pick MongoDB when your data is naturally shaped like documents and changes shape often. Pick PostgreSQL when data is very relational and you need strong joins, constraints and complex transactions.</p><ul><li><b>MongoDB fits:</b> product catalogs with different attributes per product, content/CMS, event logs, user profiles and settings, fast prototyping, very large scale with sharding.</li><li><b>PostgreSQL fits:</b> payments, orders and inventory, reporting with many joins, strict data integrity (foreign keys, CHECK constraints).</li><li>PostgreSQL's JSONB covers many "flexible field" needs, so many teams use Postgres by default and add MongoDB only when document scale or shape really needs it.</li></ul><p class="tip"><b>Interview tip:</b> say the trade-off out loud: flexible schema and easy horizontal scaling vs. joins, constraints and mature SQL reporting.</p>`],
+["mongo","Junior","What is BSON, and what is inside an ObjectId?",`<p><b>In simple words:</b> BSON is "binary JSON", the format MongoDB uses to store documents. It is faster to read and supports extra types that JSON does not have, like dates, 64-bit integers, decimals and binary data.</p><p>An <b>ObjectId</b> is a 12-byte id made of:</p><ul><li>4 bytes: the time it was created (seconds since 1970)</li><li>5 bytes: a random value unique to the machine/process</li><li>3 bytes: a counter that increases</li></ul><pre><code>const id = ObjectId()          // create a new id
+id.getTimestamp()              // when it was created, e.g. ISODate("2026-09-29T10:15:00Z")
+// Because the time comes first, sorting by _id is roughly sorting by creation time</code></pre>`],
+["mongo","Junior","Basic CRUD in mongosh: insert, find, update, delete.",`<p><b>In simple words:</b> Create with <code>insertOne/insertMany</code>, read with <code>find</code>, change with <code>updateOne/updateMany</code>, remove with <code>deleteOne/deleteMany</code>.</p><pre><code>// CREATE
+db.users.insertOne({ name: "Ana", age: 28, city: "Pune" })          // add one document
+db.users.insertMany([                                              // add several at once
+  { name: "Bo", age: 35, city: "Delhi" },
+  { name: "Cy", age: 22, city: "Pune" }
+])
+
+// READ
+db.users.find({ city: "Pune" })                        // all users in Pune
+db.users.find({ city: "Pune" }, { name: 1, _id: 0 })   // projection: only return name
+// Result: { name: "Ana" }, { name: "Cy" }
+db.users.findOne({ name: "Bo" })                       // first match only
+
+// UPDATE
+db.users.updateOne({ name: "Ana" }, { $set: { city: "Mumbai" } })   // change one field
+db.users.updateMany({ city: "Pune" }, { $inc: { age: 1 } })         // add 1 to age for everyone in Pune
+
+// DELETE
+db.users.deleteOne({ name: "Cy" })                     // remove one
+db.users.deleteMany({ age: { $lt: 18 } })              // remove all under 18</code></pre>`],
+["mongo","Mid","Explain update operators: $set, $unset, $inc, $push, $addToSet, $pull, and upsert.",`<p><b>In simple words:</b> Update operators change only part of a document instead of replacing it. Upsert means "update if found, otherwise insert a new one".</p><pre><code>// Sample: { _id: 1, name: "Ana", points: 10, tags: ["new"] }
+
+db.users.updateOne({ _id: 1 }, { $set: { city: "Pune" } })      // add or change a field
+db.users.updateOne({ _id: 1 }, { $unset: { city: "" } })        // remove a field
+db.users.updateOne({ _id: 1 }, { $inc: { points: 5 } })         // points: 10 -> 15
+db.users.updateOne({ _id: 1 }, { $push: { tags: "vip" } })      // add to array (duplicates allowed)
+db.users.updateOne({ _id: 1 }, { $addToSet: { tags: "vip" } })  // add only if not already there
+db.users.updateOne({ _id: 1 }, { $pull: { tags: "new" } })      // remove matching items from array
+// Result: { _id: 1, name: "Ana", points: 15, tags: ["vip"] }
+
+// Upsert: create the document if no match exists
+db.counters.updateOne(
+  { page: "/home" },                 // look for this page
+  { $inc: { views: 1 } },            // add 1 to views
+  { upsert: true }                   // not found? insert { page: "/home", views: 1 }
+)</code></pre>`],
+["mongo","Junior","Query operators: $eq, $gt, $in, $and, $or, $exists, $regex, $elemMatch.",`<p><b>In simple words:</b> Operators let you filter by more than exact equality, like "greater than", "one of these", or "field exists".</p><pre><code>// Sample products:
+// { name: "Pen",   price: 20,  tags: ["office"],        stock: [{ shop: "A", qty: 5 }] }
+// { name: "Phone", price: 900, tags: ["tech", "sale"],  stock: [{ shop: "B", qty: 0 }] }
+
+db.products.find({ price: { $eq: 20 } })               // price equals 20 (same as { price: 20 })
+db.products.find({ price: { $gt: 100 } })              // price greater than 100 -> Phone
+db.products.find({ price: { $gte: 10, $lte: 50 } })    // between 10 and 50 -> Pen
+db.products.find({ tags: { $in: ["sale", "promo"] } }) // has any of these tags -> Phone
+db.products.find({ $or: [{ price: { $lt: 50 } }, { tags: "sale" }] })  // either condition -> both
+db.products.find({ discount: { $exists: false } })     // documents with no "discount" field
+db.products.find({ name: { $regex: "^ph", $options: "i" } })  // name starts with "ph", any case
+
+// $elemMatch: ONE array item must match ALL conditions
+db.products.find({ stock: { $elemMatch: { shop: "A", qty: { $gt: 0 } } } })   // -> Pen</code></pre>`],
+["mongo","Mid","Sorting and pagination: why is skip slow, and what is range (cursor) pagination?",`<p><b>In simple words:</b> <code>skip(n)</code> still walks past n documents every time, so page 5000 is slow. Range pagination remembers the last item you saw and asks for items after it, which uses an index and stays fast.</p><pre><code>// Offset pagination (simple, gets slow on deep pages)
+db.posts.find().sort({ createdAt: -1 }).skip(20).limit(10)   // page 3, 10 per page
+
+// Range / cursor pagination (fast)
+// Page 1:
+db.posts.find().sort({ _id: -1 }).limit(10)
+// Remember the _id of the last post on this page, e.g. lastId
+// Next page: only posts older than lastId
+db.posts.find({ _id: { $lt: lastId } }).sort({ _id: -1 }).limit(10)</code></pre><p class="tip"><b>Follow-up:</b> make sure the sort field has an index, and add <code>_id</code> as a tie-breaker if the sort field is not unique.</p>`],
+["mongo","Mid","Embedding vs referencing: how do you model one-to-few, one-to-many and many-to-many?",`<p><b>In simple words:</b> Embed data you always read together and that stays small. Reference (store an id) when the related data is large, grows without limit, or is shared by many documents.</p><ul><li><b>One-to-few</b> (a user's 2–3 addresses): embed the array inside the user.</li><li><b>One-to-many</b> (a blog post with thousands of comments): put comments in their own collection with <code>postId</code>.</li><li><b>Many-to-many</b> (students and courses): store an array of ids on one or both sides, or a separate "enrollments" collection.</li></ul><pre><code>// Embed: addresses always shown with the user
+{ _id: 1, name: "Ana", addresses: [{ city: "Pune" }, { city: "Goa" }] }
+
+// Reference: comments can grow forever, so keep them separate
+{ _id: 101, title: "Hello" }                          // posts collection
+{ _id: 9001, postId: 101, text: "Nice post!" }        // comments collection
+
+// Many-to-many with id arrays
+{ _id: "s1", name: "Ana", courseIds: ["c1", "c2"] }   // students
+{ _id: "c1", title: "Databases" }                     // courses</code></pre><p class="tip"><b>Rule of thumb:</b> "data that is accessed together should be stored together".</p>`],
+["mongo","Senior","Name some schema design patterns: bucket, computed, subset, extended reference.",`<p><b>In simple words:</b> These are common tricks to shape documents so reads are fast and documents don't grow too big.</p><ul><li><b>Bucket:</b> group many small items into one document per time window, e.g. one document per sensor per hour holding 60 readings, instead of 60 tiny documents.</li><li><b>Computed:</b> store a pre-calculated value (like <code>totalReviews</code> or <code>avgRating</code>) and update it on write, so reads don't recalculate every time.</li><li><b>Subset:</b> keep only the most recent or most used items embedded (e.g. latest 10 reviews on the product), and the full list in another collection.</li><li><b>Extended reference:</b> copy a few frequently needed fields from a related document (e.g. customer name on the order) to avoid a <code>$lookup</code> on every read.</li></ul><pre><code>// Bucket example: one document per sensor per hour
+{
+  sensorId: "s1",
+  hour: ISODate("2026-09-29T10:00:00Z"),
+  count: 3,                                  // how many readings are in this bucket
+  readings: [ { m: 0, t: 21.5 }, { m: 1, t: 21.6 }, { m: 2, t: 21.4 } ]
+}</code></pre><p>MongoDB also has built-in <b>time series collections</b> that do bucketing for you.</p>`],
+["mongo","Mid","How do you join collections with $lookup?",`<p><b>In simple words:</b> <code>$lookup</code> is an aggregation stage that pulls matching documents from another collection into an array field, like a LEFT JOIN in SQL.</p><pre><code>// orders:    { _id: 1, customerId: 10, total: 500 }
+// customers: { _id: 10, name: "Ana" }
+
+db.orders.aggregate([
+  {
+    $lookup: {
+      from: "customers",          // the other collection
+      localField: "customerId",   // field in orders
+      foreignField: "_id",        // matching field in customers
+      as: "customer"              // put the matches in this array
+    }
+  },
+  { $unwind: "$customer" }        // turn the one-item array into a plain object
+])
+// Result: { _id: 1, customerId: 10, total: 500, customer: { _id: 10, name: "Ana" } }</code></pre><p class="tip"><b>Follow-up:</b> make sure <code>foreignField</code> is indexed. If you need <code>$lookup</code> on every request, consider embedding or the extended reference pattern instead.</p>`],
+["mongo","Mid","Explain the aggregation pipeline. Show total sales per category and the top 3 customers.",`<p><b>In simple words:</b> An aggregation pipeline is a list of steps. Each step takes documents in, changes them, and passes them to the next step, like an assembly line.</p><ul><li><code>$match</code> filter (like WHERE), <code>$group</code> group and sum (like GROUP BY), <code>$project</code> choose/rename fields, <code>$sort</code>, <code>$limit</code>, <code>$unwind</code> split an array into one document per item, <code>$lookup</code> join, <code>$addFields</code> add computed fields, <code>$facet</code> run several pipelines at once.</li></ul><pre><code>// orders: { customer: "Ana", status: "paid", items: [ { category: "books", price: 200, qty: 2 } ] }
+
+// Total sales per category
+db.orders.aggregate([
+  { $match: { status: "paid" } },                        // only paid orders
+  { $unwind: "$items" },                                 // one document per item
+  { $group: {
+      _id: "$items.category",                            // group by category
+      total: { $sum: { $multiply: ["$items.price", "$items.qty"] } }   // price x qty
+  } },
+  { $sort: { total: -1 } }                               // biggest first
+])
+// Result: { _id: "books", total: 400 }, ...
+
+// Top 3 customers by amount spent
+db.orders.aggregate([
+  { $match: { status: "paid" } },
+  { $unwind: "$items" },
+  { $group: {
+      _id: "$customer",
+      spent: { $sum: { $multiply: ["$items.price", "$items.qty"] } },
+      orders: { $addToSet: "$_id" }                      // collect unique order ids
+  } },
+  { $addFields: { orderCount: { $size: "$orders" } } },  // how many orders
+  { $project: { orders: 0 } },                           // hide the id list
+  { $sort: { spent: -1 } },
+  { $limit: 3 }
+])</code></pre><p class="tip"><b>Tip:</b> put <code>$match</code> as early as possible so the pipeline can use an index and handles fewer documents.</p>`],
+["mongo","Senior","What does $facet do? Build a search result with data and total count in one query.",`<p><b>In simple words:</b> <code>$facet</code> runs several small pipelines on the same input at once and returns all results together. It's handy for "one page of results plus the total count" or filter counts in a sidebar.</p><pre><code>db.products.aggregate([
+  { $match: { category: "phones" } },                   // shared filter
+  { $facet: {
+      data:  [ { $sort: { price: 1 } }, { $skip: 0 }, { $limit: 10 } ],   // page 1
+      total: [ { $count: "count" } ],                                     // how many in total
+      brands: [ { $group: { _id: "$brand", n: { $sum: 1 } } } ]          // counts per brand
+  } }
+])
+// Result: { data: [...10 phones], total: [{ count: 42 }], brands: [{ _id: "Acme", n: 12 }, ...] }</code></pre>`],
+["mongo","Mid","What kinds of indexes does MongoDB have? What is the ESR rule?",`<p><b>In simple words:</b> An index is a sorted lookup list that lets MongoDB find documents without scanning the whole collection.</p><ul><li><b>Single field:</b> <code>{ email: 1 }</code></li><li><b>Compound:</b> several fields, e.g. <code>{ status: 1, createdAt: -1 }</code></li><li><b>Multikey:</b> made automatically when you index an array field; one entry per array item.</li><li><b>Text:</b> word search on string fields (Atlas Search is better for real search).</li><li><b>TTL:</b> deletes documents automatically after a time.</li><li><b>Unique:</b> no two documents may have the same value.</li><li><b>Partial:</b> only indexes documents that match a filter (smaller and faster).</li></ul><p><b>ESR rule</b> for compound index field order: <b>E</b>quality fields first, then <b>S</b>ort fields, then <b>R</b>ange fields.</p><pre><code>// Query: status = "paid", sorted by date, amount > 100
+db.orders.find({ status: "paid", amount: { $gt: 100 } }).sort({ createdAt: -1 })
+
+// ESR: Equality (status), Sort (createdAt), Range (amount)
+db.orders.createIndex({ status: 1, createdAt: -1, amount: 1 })
+
+db.users.createIndex({ email: 1 }, { unique: true })                         // unique
+db.orders.createIndex({ customerId: 1 }, { partialFilterExpression: { status: "open" } })  // partial
+db.articles.createIndex({ title: "text", body: "text" })                     // text</code></pre>`],
+["mongo","Mid","How do you check if a query uses an index? COLLSCAN vs IXSCAN.",`<p><b>In simple words:</b> Add <code>.explain("executionStats")</code> to a query. <b>COLLSCAN</b> means it read every document (slow). <b>IXSCAN</b> means it used an index (fast).</p><pre><code>db.orders.find({ customerId: 42 }).explain("executionStats")
+
+// Look at these parts of the output:
+// winningPlan.stage          -> "COLLSCAN" (bad) or "IXSCAN" inside "FETCH" (good)
+// executionStats.nReturned        -> how many documents came back, e.g. 5
+// executionStats.totalDocsExamined -> how many documents were read, e.g. 1,000,000
+// executionStats.executionTimeMillis -> how long it took
+
+// Fix a COLLSCAN by adding an index on the filtered field
+db.orders.createIndex({ customerId: 1 })
+// Now totalDocsExamined should be close to nReturned (e.g. 5 and 5)</code></pre><p class="tip"><b>Goal:</b> docs examined ≈ docs returned. Also watch for an in-memory <code>SORT</code> stage, which means the sort isn't covered by the index.</p>`],
+["mongo","Mid","What is a TTL index? Use it for sessions and password-reset tokens.",`<p><b>In simple words:</b> A TTL (time to live) index tells MongoDB to delete documents automatically once a date field is older than a set time. Perfect for sessions, OTPs and reset tokens.</p><pre><code>// Option 1: delete 30 minutes after "createdAt"
+db.reset_tokens.createIndex({ createdAt: 1 }, { expireAfterSeconds: 1800 })
+
+// Option 2: store the exact expiry time and delete at that moment
+db.sessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+db.sessions.insertOne({
+  userId: ObjectId("66f1c2a9e4b0a1b2c3d4e5f6"),
+  expiresAt: new Date(Date.now() + 14 * 24 * 3600 * 1000)   // 14 days from now
+})</code></pre><p class="tip"><b>Important:</b> the background cleanup runs about once a minute, so documents can live a little past expiry. Always also check the expiry in your code.</p>`],
+["mongo","Mid","Store users and password-reset tokens in MongoDB securely.",`<p><b>In simple words:</b> Keep emails unique with a unique index, store only a hash of the password and of the reset token, and let a TTL index delete old tokens automatically.</p><pre><code>// users: one account per email
+db.users.createIndex({ email: 1 }, { unique: true })
+db.users.insertOne({
+  email: "ana@example.com",              // store lowercased
+  passwordHash: "$argon2id$v=19$...",    // Argon2 hash, never the real password
+  emailVerified: false,
+  createdAt: new Date()
+})
+
+// reset_tokens: short-lived and single-use
+db.reset_tokens.createIndex({ tokenHash: 1 }, { unique: true })     // fast lookup by hash
+db.reset_tokens.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 })  // auto-delete when expired
+db.reset_tokens.insertOne({
+  userId: ObjectId("66f1c2a9e4b0a1b2c3d4e5f6"),
+  tokenHash: "sha256-of-the-random-token",   // the email gets the real token, the DB only the hash
+  expiresAt: new Date(Date.now() + 30 * 60 * 1000)   // 30 minutes
+})
+
+// When the user clicks the link: find the hash, check expiry, then delete it (single use)
+db.reset_tokens.findOneAndDelete({ tokenHash: "sha256-of-the-random-token", expiresAt: { $gt: new Date() } })</code></pre>`],
+["mongo","Senior","Does MongoDB support transactions? When do you need them?",`<p><b>In simple words:</b> A single-document update is always atomic, even if it changes many fields and arrays. For changes across several documents or collections that must all succeed or all fail, MongoDB has multi-document transactions (needs a replica set or sharded cluster).</p><pre><code>// Transfer money between two accounts (mongosh)
+const session = db.getMongo().startSession()
+const accounts = session.getDatabase("bank").accounts
+session.startTransaction()
+try {
+  accounts.updateOne({ _id: "A" }, { $inc: { balance: -100 } })   // take from A
+  accounts.updateOne({ _id: "B" }, { $inc: { balance: 100 } })    // give to B
+  session.commitTransaction()                                     // save both together
+} catch (err) {
+  session.abortTransaction()                                      // undo both on any error
+  throw err
+} finally {
+  session.endSession()
+}</code></pre><p class="tip"><b>Tip:</b> transactions cost performance. Good schema design (embedding related data in one document) removes the need for most of them.</p>`],
+["mongo","Senior","Explain write concern, read concern and read preference.",`<p><b>In simple words:</b> These settings trade speed for safety in a replica set.</p><ul><li><b>Write concern</b> = how many servers must confirm a write before it counts. <code>w: 1</code> only the primary (fast); <code>w: "majority"</code> most members (safe, survives failover; the default in modern versions). Add <code>j: true</code> to wait for the on-disk journal.</li><li><b>Read concern</b> = how "confirmed" the data you read must be. <code>"local"</code> newest data on that server (may be rolled back); <code>"majority"</code> only data confirmed by most members.</li><li><b>Read preference</b> = which server to read from. <code>primary</code> (default, always fresh), <code>primaryPreferred</code>, <code>secondary</code>, <code>secondaryPreferred</code>, <code>nearest</code> (lowest latency). Secondaries can be slightly behind.</li></ul><pre><code>db.orders.insertOne({ total: 500 }, { writeConcern: { w: "majority", j: true } })
+// Connection string example:
+// mongodb+srv://.../shop?readPreference=secondaryPreferred&amp;w=majority</code></pre>`],
+["mongo","Senior","What is a replica set, and how does failover work?",`<p><b>In simple words:</b> A replica set is a group of MongoDB servers holding the same data: one <b>primary</b> takes writes, and <b>secondaries</b> copy its changes. If the primary goes down, the others vote and promote a secondary to be the new primary automatically.</p><ul><li>Usually 3 members (an odd number so a majority can vote).</li><li>Secondaries copy changes from the primary's <b>oplog</b> (a log of every write).</li><li>An election typically finishes within about 10–12 seconds; drivers retry writes automatically (<code>retryWrites=true</code>).</li><li>Writes with <code>w: "majority"</code> are never lost in a failover.</li></ul>`],
+["mongo","Senior","What is sharding, and how do you choose a shard key?",`<p><b>In simple words:</b> Sharding splits one big collection across several servers (shards) so each holds part of the data. The <b>shard key</b> is the field MongoDB uses to decide which shard a document goes to.</p><ul><li><b>Good shard key:</b> many different values (high cardinality), spreads writes evenly, and appears in most queries so MongoDB can go to one shard.</li><li><b>Bad:</b> a steadily increasing value like a timestamp or default ObjectId alone, which sends all new writes to one "hot" shard.</li><li><b>Options:</b> a hashed key for even spread (<code>{ userId: "hashed" }</code>), or a compound key like <code>{ tenantId: 1, createdAt: 1 }</code>.</li><li>Queries without the shard key hit every shard ("scatter-gather"), which is slower.</li></ul><pre><code>sh.shardCollection("shop.orders", { customerId: "hashed" })   // spread orders evenly by customer</code></pre>`],
+["mongo","Mid","How do you enforce a schema in MongoDB?",`<p><b>In simple words:</b> MongoDB is flexible by default, but you can add a <code>$jsonSchema</code> validator so the database rejects documents with missing or wrong fields. In apps you usually also validate with Mongoose or Pydantic.</p><pre><code>db.createCollection("users", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["email", "passwordHash"],               // these fields must exist
+      properties: {
+        email: { bsonType: "string", pattern: "^.+@.+$" },   // must look like an email
+        age:   { bsonType: "int", minimum: 13 },             // whole number, 13 or more
+        role:  { enum: ["user", "admin"] }                   // only these values allowed
+      }
+    }
+  },
+  validationAction: "error"     // reject bad documents ("warn" only logs them)
+})</code></pre>`],
+["mongo","Senior","What are change streams and when would you use them?",`<p><b>In simple words:</b> A change stream lets your app listen to inserts, updates and deletes on a collection in real time, without polling. It is built on the replica set oplog.</p><ul><li>Uses: live notifications, syncing data to a search index or cache, audit logs, triggering emails when an order is created.</li><li>Save the <b>resume token</b> so you can continue from where you stopped after a restart.</li></ul><pre><code>// Node.js
+const stream = db.collection("orders").watch([
+  { $match: { operationType: "insert" } }          // only new orders
+])
+stream.on("change", (change) => {
+  console.log("New order:", change.fullDocument)  // the inserted document
+  saveResumeToken(change._id)                     // remember where we are
+})</code></pre>`],
+["mongo","Mid","Use Mongoose in a Next.js / Node API: schema, model, validation, populate, lean.",`<p><b>In simple words:</b> Mongoose adds schemas, validation and helper methods on top of the MongoDB driver for Node.js. <code>populate</code> fills in referenced documents; <code>lean()</code> returns plain objects, which is faster for read-only work.</p><pre><code>// models/Post.js
+import mongoose from "mongoose";
+
+const postSchema = new mongoose.Schema({
+  title:  { type: String, required: true, trim: true, maxlength: 200 },   // validation rules
+  author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },           // reference to users
+  tags:   [String],
+}, { timestamps: true });                    // adds createdAt and updatedAt automatically
+
+postSchema.index({ author: 1, createdAt: -1 });   // index for "posts by author, newest first"
+
+// Reuse the model if it already exists (Next.js hot reload creates modules again)
+export default mongoose.models.Post || mongoose.model("Post", postSchema);
+
+// app/api/posts/route.js
+import Post from "@/models/Post";
+import { connectDB } from "@/lib/db";          // caches one connection across requests
+
+export async function GET() {
+  await connectDB();
+  const posts = await Post.find()
+    .sort({ createdAt: -1 })
+    .limit(20)
+    .populate("author", "name")                // replace author id with { _id, name }
+    .lean();                                   // plain JS objects, faster
+  return Response.json(posts);
+}</code></pre>`],
+["mongo","Mid","Use MongoDB from Python / FastAPI with PyMongo's async client (or Motor).",`<p><b>In simple words:</b> PyMongo is the official Python driver. For async FastAPI apps use its async client (<code>AsyncMongoClient</code>, PyMongo 4.9+); older projects use Motor, which works the same way. Create one client at startup and reuse it.</p><pre><code>from fastapi import FastAPI, HTTPException
+from pymongo import AsyncMongoClient
+from bson import ObjectId
+
+app = FastAPI()
+client = AsyncMongoClient("mongodb://localhost:27017")   # one client for the whole app
+db = client["shop"]                                       # pick the database
+
+@app.get("/products/{product_id}")
+async def get_product(product_id: str):
+    if not ObjectId.is_valid(product_id):                 # reject bad ids early
+        raise HTTPException(400, "Invalid id")
+    product = await db.products.find_one({"_id": ObjectId(product_id)})
+    if product is None:
+        raise HTTPException(404, "Product not found")
+    product["_id"] = str(product["_id"])                  # ObjectId is not JSON, convert to string
+    return product
+
+@app.post("/products", status_code=201)
+async def create_product(body: dict):
+    result = await db.products.insert_one(body)           # insert the new product
+    return {"id": str(result.inserted_id)}                # send back the new id</code></pre><p class="tip"><b>Tip:</b> in real code, validate <code>body</code> with a Pydantic model instead of a plain dict.</p>`],
+["mongo","Senior","What are common MongoDB performance problems?",`<p><b>In simple words:</b> Most slowness comes from missing indexes or documents that grow too big.</p><ul><li><b>Missing indexes:</b> COLLSCAN on large collections. Check with <code>explain()</code> and the Atlas Performance Advisor.</li><li><b>Unbounded arrays:</b> e.g. pushing every comment into the post document forever. Documents get huge and slow to update. Use a separate collection or the subset pattern.</li><li><b>16 MB document limit:</b> a single document can't grow past 16 MB. Use GridFS or blob storage for files.</li><li><b>Huge $in lists</b> (thousands of values) and large <code>skip()</code> values.</li><li><b>Returning whole documents</b> when you need 2 fields: use a projection.</li><li><b>Too many indexes:</b> every index slows writes and uses memory. Keep the working set (hot data + indexes) in RAM.</li><li><b>Regex that doesn't start with ^</b> can't use an index well.</li></ul>`],
+["mongo","Mid","What is NoSQL injection and how do you prevent it?",`<p><b>In simple words:</b> If you put user input straight into a query, an attacker can send a query operator instead of a value. For example, a login body with <code>{"$ne": null}</code> as the password matches every user.</p><pre><code>// Attacker sends this JSON body to /login:
+// { "email": "admin@site.com", "password": { "$ne": null } }
+
+// VULNERABLE: the object becomes a query operator
+db.users.findOne({ email: req.body.email, password: req.body.password })   // matches admin!
+
+// SAFE: make sure inputs are plain strings, then compare the hash in code
+const email = String(req.body.email)
+const password = String(req.body.password)
+const user = await db.users.findOne({ email: email })         // look up by email only
+const ok = user &amp;&amp; await argon2.verify(user.passwordHash, password)  // check password in code</code></pre><ul><li>Validate request bodies with Zod / Joi / Pydantic (types, not just presence).</li><li>Use Mongoose schemas with strict query filtering (<code>sanitizeFilter</code>), or strip keys starting with <code>$</code>.</li><li>Never pass user input to <code>$where</code> or <code>$function</code>.</li></ul>`],
+["mongo","Mid","MongoDB Atlas vs Azure Cosmos DB for MongoDB (vCore): what's the difference?",`<p><b>In simple words:</b> Atlas is MongoDB's own managed cloud service and runs on Azure, AWS or GCP. Azure Cosmos DB for MongoDB is Microsoft's service that speaks the MongoDB protocol, so most MongoDB drivers and code work with it.</p><ul><li><b>Atlas:</b> real MongoDB engine with all the newest features, Atlas Search and Vector Search, Performance Advisor, and can be deployed in Azure regions.</li><li><b>Cosmos DB for MongoDB (vCore):</b> billed per cluster like a normal database, fits well with Azure networking, Entra ID and billing, and supports vector search. It is compatible with most, but not every, MongoDB feature and version.</li><li><b>Cosmos DB for MongoDB (RU-based):</b> the older serverless-style option billed by request units, with more compatibility limits.</li></ul><p class="tip"><b>Interview answer:</b> check feature compatibility (aggregation stages, transactions, change streams) for your app, then compare cost and how the team already works on Azure.</p>`],
+// ---------- Redis ----------
+["redis","Junior","What is Redis and why is it so fast?",`<p><b>In simple words:</b> Redis is a key-value database that keeps all its data in memory (RAM), so reads and writes take well under a millisecond. It is mostly used as a cache, a session store, a rate limiter and a lightweight message broker.</p><ul><li><b>In memory:</b> no disk seek on reads; disk is only used for backups (persistence).</li><li><b>Single-threaded command execution:</b> one main thread runs commands one after another, so there are no locks between commands and every command is atomic.</li><li><b>I/O threads (Redis 6+):</b> extra threads can read and write network data, while commands still run on the main thread.</li><li><b>Simple data structures</b> and an efficient event loop (epoll) handling thousands of connections.</li></ul>`],
+["redis","Junior","Redis data types: String, Hash, List, Set, Sorted Set (with redis-cli examples).",`<p><b>In simple words:</b> Each key holds one type of value. Pick the type that matches how you read the data.</p><pre><code># String: text, numbers, JSON
+SET user:1:name "Ana"          # save a value
+GET user:1:name                # "Ana"
+INCR page:views                # add 1 -> (integer) 1
+
+# Hash: an object with fields (like a small dict)
+HSET user:1 name "Ana" age 30  # set two fields
+HGET user:1 name               # "Ana"
+HGETALL user:1                 # 1) "name" 2) "Ana" 3) "age" 4) "30"
+
+# List: ordered, allows duplicates (queue / recent items)
+LPUSH recent:1 "post:9"        # add to the front
+LRANGE recent:1 0 9            # first 10 items
+
+# Set: unique items, no order
+SADD tags:post:9 "python" "redis"   # add two tags
+SISMEMBER tags:post:9 "python"      # (integer) 1 = yes
+
+# Sorted Set: unique items, each with a score, kept sorted by score
+ZADD scores 150 "ana" 90 "bo"       # member with score
+ZREVRANGE scores 0 2 WITHSCORES     # top 3, highest first</code></pre>`],
+["redis","Mid","What are Streams, Bitmaps, HyperLogLog and Geo in Redis?",`<p><b>In simple words:</b> Special data types for specific jobs.</p><pre><code># Stream: an append-only log of events, readable by consumer groups
+XADD orders * id 42 total 99.5          # add an event, Redis makes the ID
+XGROUP CREATE orders workers $ MKSTREAM  # create a consumer group
+XREADGROUP GROUP workers w1 COUNT 10 STREAMS orders &gt;   # read new events
+XACK orders workers 1700000000000-0     # mark an event as done
+
+# Bitmap: one bit per user per day (very small)
+SETBIT login:2026-09-29 1001 1          # user 1001 logged in today
+BITCOUNT login:2026-09-29               # how many users logged in
+
+# HyperLogLog: approximate count of unique items in ~12 KB
+PFADD visitors:today "ip1" "ip2" "ip1"  # add visitors
+PFCOUNT visitors:today                  # (integer) 2
+
+# Geo: store coordinates, search nearby
+GEOADD shops 72.8777 19.0760 "mumbai-1" # longitude, latitude, name
+GEOSEARCH shops FROMLONLAT 72.88 19.07 BYRADIUS 5 km ASC   # shops within 5 km</code></pre>`],
+["redis","Junior","How does key expiry work (EXPIRE, TTL, SET EX NX) and how are expired keys removed?",`<p><b>In simple words:</b> You can give any key a time to live. After it runs out, the key is gone.</p><pre><code>SET otp:ana "482913" EX 300      # save for 300 seconds (5 minutes)
+TTL otp:ana                      # seconds left, e.g. (integer) 287
+EXPIRE session:abc 1800          # add a 30-minute expiry to an existing key
+PERSIST session:abc              # remove the expiry
+SET lock:job1 "worker-7" NX EX 30   # set ONLY if the key does not exist
+TTL missing:key                  # (integer) -2 = key does not exist
+TTL no:expiry:key                # (integer) -1 = key exists, no expiry</code></pre><p>Redis removes expired keys in two ways:</p><ul><li><b>Lazily:</b> when you try to read a key, Redis checks if it expired and deletes it.</li><li><b>Actively:</b> a background job regularly samples keys that have an expiry and deletes the expired ones.</li></ul><p class="tip"><b>Follow-up:</b> <code>SET</code> without <code>KEEPTTL</code> removes an existing expiry.</p>`],
+["redis","Mid","What happens when Redis runs out of memory? Explain eviction policies.",`<p><b>In simple words:</b> You set a memory limit with <code>maxmemory</code>. When Redis reaches it, the <code>maxmemory-policy</code> decides what to delete to make room, or whether to refuse writes.</p><ul><li><code>noeviction</code> (default): refuse new writes with an error. Good for data you must not lose.</li><li><code>allkeys-lru</code>: delete the least recently used key. Best default for a pure cache.</li><li><code>allkeys-lfu</code>: delete the least frequently used key.</li><li><code>volatile-lru</code> / <code>volatile-lfu</code> / <code>volatile-ttl</code>: only delete keys that have an expiry.</li><li><code>allkeys-random</code> / <code>volatile-random</code>: delete a random key.</li></ul><pre><code>CONFIG SET maxmemory 2gb                  # memory limit
+CONFIG SET maxmemory-policy allkeys-lru   # evict least recently used keys</code></pre><p>Redis uses an approximate LRU: it samples a few keys and evicts the oldest of the sample.</p>`],
+["redis","Mid","Redis persistence: RDB vs AOF vs both?",`<p><b>In simple words:</b> Redis lives in RAM, so it saves to disk to survive a restart.</p><ul><li><b>RDB (snapshots):</b> saves the whole dataset every so often. Small files, fast restart, but you can lose the writes since the last snapshot.</li><li><b>AOF (append-only file):</b> logs every write. With <code>appendfsync everysec</code> you lose at most about 1 second of data. Bigger files; Redis rewrites the file in the background to shrink it.</li><li><b>Both:</b> the usual choice when Redis holds data you care about. On restart Redis loads the AOF because it is more complete.</li><li><b>None:</b> fine for a pure cache that can be rebuilt from the database.</li></ul><pre><code>save 900 1                 # RDB: snapshot if 1 change in 900 seconds
+appendonly yes             # turn on AOF
+appendfsync everysec       # flush AOF to disk once a second</code></pre>`],
+["redis","Mid","Explain cache-aside with a Python example. How do you invalidate the cache?",`<p><b>In simple words:</b> Check Redis first. If the data is missing, load it from the database, save it in Redis with an expiry, and return it. When the data changes, delete the cache key so the next read loads fresh data.</p><pre><code>import json
+import redis
+
+r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+
+def get_user(user_id):
+    key = f"user:{user_id}"                 # one key per user
+    cached = r.get(key)                     # 1. try the cache
+    if cached is not None:
+        return json.loads(cached)           # cache hit: return it
+    user = db_get_user(user_id)             # 2. cache miss: read the database
+    r.set(key, json.dumps(user), ex=600)    # 3. save for 10 minutes
+    return user
+
+def update_user(user_id, data):
+    db_update_user(user_id, data)           # 1. write to the database first
+    r.delete(f"user:{user_id}")             # 2. then delete the cached copy</code></pre><ul><li><b>Write-through:</b> write to the cache and the database together on every update. Reads are always warm, writes are slower.</li><li><b>Write-behind (write-back):</b> write to the cache, and a background job saves to the database later. Fast, but you can lose data if Redis fails.</li></ul><p class="tip"><b>Why delete instead of update the cache?</b> Two updates racing can leave an old value in the cache. Deleting is simpler, and the TTL is your safety net.</p>`],
+["redis","Senior","What is a cache stampede (thundering herd) and how do you prevent it?",`<p><b>In simple words:</b> A popular key expires, and hundreds of requests all miss the cache at the same moment and hit the database together, which can take it down.</p><ul><li><b>Lock so only one request rebuilds:</b> the first request takes a short lock with <code>SET lock:key 1 NX EX 10</code>; the others wait briefly and read the cache again.</li><li><b>Add jitter to TTLs:</b> <code>ex=600 + random.randint(0, 60)</code> so keys don't all expire together.</li><li><b>Stale-while-revalidate:</b> keep serving the old value while one background job refreshes it.</li><li><b>Pre-warm</b> very hot keys before they expire.</li></ul><pre><code>import random, time
+
+def get_with_lock(key, load_fn):
+    value = r.get(key)                              # try the cache
+    if value is not None:
+        return value
+    got_lock = r.set("lock:" + key, "1", nx=True, ex=10)   # only one winner
+    if got_lock:
+        value = load_fn()                           # winner loads from the DB
+        r.set(key, value, ex=600 + random.randint(0, 60))  # TTL with jitter
+        r.delete("lock:" + key)                     # release the lock
+        return value
+    time.sleep(0.05)                                # others wait a little
+    return r.get(key) or load_fn()                  # then read the fresh cache</code></pre>`],
+["redis","Mid","What are cache penetration and cache avalanche?",`<p><b>In simple words:</b></p><ul><li><b>Cache penetration:</b> requests for data that doesn't exist (e.g. random IDs) always miss the cache and always hit the database. Fix: cache the "not found" result for a short time, validate IDs early, or use a Bloom filter.</li><li><b>Cache avalanche:</b> many keys expire at the same time, or Redis goes down, so all traffic hits the database. Fix: random jitter on TTLs, a replica / high-availability setup, and rate limiting or circuit breakers in front of the database.</li><li><b>Cache stampede</b> is the one-hot-key version of this (see the previous question).</li></ul><pre><code>user = db_get_user(user_id)
+if user is None:
+    r.set(f"user:{user_id}", "NULL", ex=60)   # remember "missing" for 1 minute</code></pre>`],
+["redis","Mid","How do you store login sessions in Redis?",`<p><b>In simple words:</b> After login, create a random session ID, store <code>session:ID → user data</code> in Redis with an expiry, and put only the ID in an HttpOnly cookie. Every request looks the session up; logout deletes the key.</p><pre><code>import json, secrets
+
+SESSION_TTL = 60 * 60 * 24               # 1 day in seconds
+
+def create_session(user_id):
+    session_id = secrets.token_urlsafe(32)     # long random ID, impossible to guess
+    data = json.dumps({"user_id": user_id})
+    r.set("session:" + session_id, data, ex=SESSION_TTL)   # save with expiry
+    r.sadd("user_sessions:" + str(user_id), session_id)    # track all sessions of this user
+    return session_id                          # goes into an HttpOnly cookie
+
+def get_session(session_id):
+    data = r.get("session:" + session_id)      # look it up on every request
+    if data is None:
+        return None                            # expired or logged out
+    r.expire("session:" + session_id, SESSION_TTL)   # sliding expiry: extend on activity
+    return json.loads(data)
+
+def logout(session_id):
+    r.delete("session:" + session_id)          # the session is gone instantly
+
+def logout_everywhere(user_id):                # e.g. after a password reset
+    key = "user_sessions:" + str(user_id)
+    for session_id in r.smembers(key):
+        r.delete("session:" + session_id)
+    r.delete(key)</code></pre><p>This is why server sessions can be revoked instantly, unlike plain JWTs.</p>`],
+["redis","Mid","How do you use Redis to revoke JWTs or keep a token denylist?",`<p><b>In simple words:</b> When a user logs out, save the token's unique ID (<code>jti</code>) in Redis until the token would expire anyway. On every request, check that the ID is not in the denylist.</p><pre><code>import time
+
+def revoke_token(payload):
+    jti = payload["jti"]                        # unique ID inside the JWT
+    seconds_left = payload["exp"] - int(time.time())   # time until it expires
+    if seconds_left > 0:
+        r.set("revoked:" + jti, "1", ex=seconds_left)  # auto-deletes when useless
+
+def is_revoked(payload):
+    return r.exists("revoked:" + payload["jti"]) == 1  # 1 = revoked
+
+# Refresh tokens: store them (hashed) with a TTL, and delete on use (rotation)
+r.set("refresh:" + token_hash, user_id, ex=14 * 24 * 3600)</code></pre><p>Because each entry expires with the token, the denylist never grows forever.</p>`],
+["redis","Mid","Build a rate limiter with Redis (fixed window and sliding window).",`<p><b>In simple words:</b> Count requests per user or IP in Redis. If the count goes over the limit, return HTTP 429.</p><pre><code>import time, uuid
+
+# Fixed window: "max 5 login attempts per minute"
+def allow_fixed(ip, limit=5, window=60):
+    key = "rl:login:" + ip + ":" + str(int(time.time() // window))  # one key per minute
+    count = r.incr(key)                  # add 1, returns the new count
+    if count == 1:
+        r.expire(key, window)            # first hit: make the key expire
+    return count &lt;= limit                # True = allowed
+
+# Sliding window: counts requests in the LAST 60 seconds (smoother)
+def allow_sliding(ip, limit=5, window=60):
+    key = "rl:sliding:" + ip
+    now = time.time()
+    pipe = r.pipeline()                              # send all commands together
+    pipe.zremrangebyscore(key, 0, now - window)      # drop hits older than the window
+    pipe.zadd(key, {str(uuid.uuid4()): now})         # record this hit (score = time)
+    pipe.zcard(key)                                  # count hits in the window
+    pipe.expire(key, window)                         # clean up idle keys
+    results = pipe.execute()
+    count = results[2]                               # the ZCARD result
+    return count &lt;= limit</code></pre><p class="tip"><b>Trade-off:</b> fixed window allows a burst of 2x the limit around the boundary (end of one minute + start of the next). Sliding window avoids that but uses more memory.</p>`],
+["redis","Senior","How do you build a distributed lock with Redis? What are the caveats?",`<p><b>In simple words:</b> Use <code>SET key value NX PX</code>: it only succeeds if nobody holds the lock, and the expiry frees the lock if the holder crashes. Store a random token so you only ever delete <b>your own</b> lock.</p><pre><code>import uuid
+
+RELEASE_SCRIPT = """
+if redis.call('GET', KEYS[1]) == ARGV[1] then
+    return redis.call('DEL', KEYS[1])
+else
+    return 0
+end
+"""
+
+def acquire(name, ttl_ms=10000):
+    token = str(uuid.uuid4())                              # my unique token
+    ok = r.set("lock:" + name, token, nx=True, px=ttl_ms)  # only if free
+    return token if ok else None
+
+def release(name, token):
+    # check-and-delete in ONE atomic step, so we never delete someone else's lock
+    return r.eval(RELEASE_SCRIPT, 1, "lock:" + name, token)</code></pre><ul><li><b>Why not just DEL?</b> If your work took longer than the TTL, the lock expired and another worker took it; a plain DEL would remove their lock.</li><li><b>Redlock</b> (locking across several independent Redis nodes) is debated: pauses (GC, network) can still let two clients think they hold the lock. For correctness-critical work, use fencing tokens or a database lock (e.g. Postgres <code>SELECT ... FOR UPDATE</code>).</li></ul>`],
+["redis","Mid","Pub/Sub vs Streams vs a real message queue: which one?",`<p><b>In simple words:</b></p><ul><li><b>Pub/Sub:</b> fire-and-forget. Subscribers that are offline miss the message; nothing is stored. Good for live notifications, chat typing indicators, cache-invalidation broadcasts.</li><li><b>Streams:</b> messages are stored, consumer groups share work, and <code>XACK</code> confirms processing, so crashed workers can be retried. Good for lightweight job queues and event logs.</li><li><b>A real broker</b> (Azure Service Bus, RabbitMQ, Kafka): use it when you need dead-letter queues, guaranteed delivery at large scale, long retention, complex routing, or cross-team integration.</li></ul><pre><code>SUBSCRIBE notifications                   # client 1 listens
+PUBLISH notifications "order 42 shipped"  # client 2 sends; returns number of listeners</code></pre>`],
+["redis","Junior","Build a game leaderboard with a sorted set.",`<p><b>In simple words:</b> A sorted set keeps members ordered by score automatically, so top-N and "what is my rank" are single fast commands.</p><pre><code>ZADD leaderboard 1200 "ana"          # add player with score
+ZADD leaderboard 950 "bo" 1500 "cy"  # add two more
+ZINCRBY leaderboard 100 "bo"         # bo scores 100 more -> 1050
+ZREVRANGE leaderboard 0 2 WITHSCORES # top 3: cy 1500, ana 1200, bo 1050
+ZREVRANK leaderboard "ana"           # (integer) 1  (0 = first place)
+ZSCORE leaderboard "ana"             # "1200"</code></pre><pre><code># Python
+r.zadd("leaderboard", {"ana": 1200})               # add or update a score
+r.zincrby("leaderboard", 100, "bo")                # add points
+top3 = r.zrevrange("leaderboard", 0, 2, withscores=True)   # [('cy', 1500.0), ...]</code></pre><p>Adding and ranking are O(log n), even with millions of players.</p>`],
+["redis","Mid","Count unique visitors per day cheaply.",`<p><b>In simple words:</b> A Set gives the exact count but stores every visitor, which gets large. HyperLogLog gives an estimate (about 0.81% error) in at most ~12 KB, no matter how many visitors.</p><pre><code>PFADD uv:2026-09-29 "user:1" "user:2" "user:1"   # add visitors (duplicates ignored)
+PFCOUNT uv:2026-09-29                              # (integer) 2
+PFMERGE uv:week uv:2026-09-28 uv:2026-09-29        # combine days into a week
+PFCOUNT uv:week                                    # unique visitors this week</code></pre><p>Use a Set when you need the exact list of IDs, HyperLogLog when you only need the number.</p>`],
+["redis","Mid","Pipelining vs MULTI/EXEC transactions vs WATCH.",`<p><b>In simple words:</b></p><ul><li><b>Pipelining:</b> send many commands in one network round trip. Faster, but not atomic: other clients' commands can run in between.</li><li><b>MULTI/EXEC:</b> queue commands and run them all together, with nothing else running in between. There is <b>no rollback</b>: if one command fails at run time, the others still run.</li><li><b>WATCH:</b> optimistic locking. If a watched key changes before EXEC, the whole transaction is cancelled and you retry.</li></ul><pre><code># Python: move 10 credits between users only if the balance didn't change meanwhile
+with r.pipeline() as pipe:
+    while True:
+        try:
+            pipe.watch("credits:ana")                 # watch the key
+            balance = int(pipe.get("credits:ana"))    # read current value
+            if balance &lt; 10:
+                raise ValueError("not enough credits")
+            pipe.multi()                              # start the transaction
+            pipe.decrby("credits:ana", 10)
+            pipe.incrby("credits:bo", 10)
+            pipe.execute()                            # fails if credits:ana changed
+            break                                     # success
+        except redis.WatchError:
+            continue                                  # someone changed it: retry</code></pre>`],
+["redis","Senior","What are Lua scripts in Redis and when would you use one?",`<p><b>In simple words:</b> A Lua script runs on the Redis server as one atomic step: no other command runs in the middle. Use it for "read, decide, then write" logic that must not be interrupted, like the safe lock release or a rate limiter.</p><pre><code># Python: increment a counter but never above a maximum
+SCRIPT = """
+local current = tonumber(redis.call('GET', KEYS[1]) or '0')
+if current &lt; tonumber(ARGV[1]) then
+    return redis.call('INCR', KEYS[1])
+end
+return -1
+"""
+limited_incr = r.register_script(SCRIPT)   # loaded once, called by its hash
+print(limited_incr(keys=["seats:show42"], args=[100]))   # 1, 2, ... then -1 when full</code></pre><p class="tip"><b>Caveat:</b> keep scripts short; a slow script blocks every other client. Redis 7 also adds <b>Functions</b>, stored scripts that survive restarts.</p>`],
+["redis","Senior","Replication, Sentinel and Redis Cluster: what's the difference?",`<p><b>In simple words:</b></p><ul><li><b>Replication:</b> one primary takes writes and copies data to replicas (asynchronously). Replicas can serve reads and act as backups.</li><li><b>Sentinel:</b> watches the primary; if it dies, Sentinel promotes a replica to primary and tells clients the new address. High availability, but all data still fits on one node.</li><li><b>Redis Cluster:</b> splits data across several primaries (sharding). Keys are mapped to 16,384 <b>hash slots</b> (CRC16 of the key mod 16384), and each primary owns a range of slots, each with its own replicas.</li></ul><pre><code># Multi-key commands in a cluster only work if all keys are in the same slot.
+# A "hash tag" in braces forces keys into the same slot:
+SET {user:1}:profile "..."
+SET {user:1}:cart "..."        # same slot as above, because only "user:1" is hashed</code></pre><p class="tip"><b>Note:</b> replication is async, so a failover can lose the last few writes.</p>`],
+["redis","Mid","Common Redis mistakes in production?",`<ul><li><b><code>KEYS *</code></b> scans every key and blocks the server. Use <code>SCAN</code>, which walks keys in small batches.</li><li><b>Big keys:</b> a hash or list with millions of items is slow to read, delete or replicate. Split it up; delete big keys with <code>UNLINK</code> (non-blocking).</li><li><b>Hot keys:</b> one key hit by all traffic overloads one node. Add a small in-app cache or split the key.</li><li><b>No TTLs on cache keys:</b> memory fills up forever.</li><li><b>Using Redis as the only copy</b> of important data without persistence or replicas.</li><li><b>Opening a new connection per request</b> instead of reusing a connection pool.</li></ul><pre><code>SCAN 0 MATCH session:* COUNT 100    # returns a cursor + up to ~100 keys
+SCAN 17 MATCH session:* COUNT 100   # continue from the returned cursor until it is 0
+MEMORY USAGE user:1                 # bytes used by one key
+redis-cli --bigkeys                 # find the biggest keys</code></pre>`],
+["redis","Mid","Use Redis from FastAPI with redis.asyncio.",`<p><b>In simple words:</b> Create one async client when the app starts, share it through a dependency, and close it on shutdown. Never create a client per request.</p><pre><code>from contextlib import asynccontextmanager
+from fastapi import FastAPI, Depends, HTTPException, Request
+import redis.asyncio as redis
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.redis = redis.from_url("redis://localhost:6379/0", decode_responses=True)  # one shared pool
+    yield
+    await app.state.redis.aclose()          # close when the app stops
+
+app = FastAPI(lifespan=lifespan)
+
+def get_redis(request: Request):
+    return request.app.state.redis          # hand the shared client to routes
+
+@app.get("/products/{product_id}")
+async def product(product_id: int, r = Depends(get_redis)):
+    key = f"product:{product_id}"
+    cached = await r.get(key)               # async call, doesn't block the event loop
+    if cached:
+        return {"source": "cache", "data": cached}
+    data = await load_product(product_id)   # your DB call
+    if data is None:
+        raise HTTPException(404, "Product not found")
+    await r.set(key, data, ex=300)          # cache for 5 minutes
+    return {"source": "db", "data": data}</code></pre>`],
+["redis","Mid","Use Redis from Next.js / Node with ioredis.",`<p><b>In simple words:</b> Create one client and reuse it. In Next.js dev mode, files reload often, so keep the client on <code>globalThis</code> to avoid opening a new connection on every reload. Only use it in server code (Server Components, Route Handlers, Server Actions).</p><pre><code>// lib/redis.ts
+import Redis from 'ioredis';
+
+const globalForRedis = globalThis;
+export const redis = globalForRedis.redis || new Redis(process.env.REDIS_URL);  // reuse if it exists
+if (process.env.NODE_ENV !== 'production') globalForRedis.redis = redis;
+
+// app/api/views/[slug]/route.ts
+import { redis } from '@/lib/redis';
+export async function POST(req, { params }) {
+  const { slug } = await params;
+  const views = await redis.incr('views:' + slug);   // count a page view
+  return Response.json({ views });
+}</code></pre><p>On serverless/edge platforms, an HTTP-based Redis client is often used instead of long-lived TCP connections.</p>`],
+["redis","Mid","Azure Cache for Redis / Azure Managed Redis: what should you know?",`<p><b>In simple words:</b> Azure runs Redis for you: patching, replicas, failover and backups.</p><ul><li><b>Azure Cache for Redis</b> tiers: Basic (single node, no SLA, dev only), Standard (primary + replica), Premium (clustering, persistence, VNet, geo-replication), Enterprise tiers (Redis Enterprise modules).</li><li><b>Azure Managed Redis</b> is the newer offering built on Redis Enterprise; Microsoft recommends it for new projects. Check the current docs for tier names and retirement dates.</li><li><b>TLS:</b> Azure Cache for Redis uses port <b>6380</b> for TLS; the non-TLS port 6379 is disabled by default. Azure Managed Redis uses port 10000.</li><li><b>Auth:</b> prefer <b>Microsoft Entra ID</b> with a managed identity over access keys; otherwise keep keys in Key Vault.</li><li>Use <b>Private Endpoints</b> so Redis isn't reachable from the public internet.</li></ul><pre><code># Python connection to Azure Cache for Redis with TLS
+r = redis.Redis(host="myapp.redis.cache.windows.net", port=6380,
+                ssl=True, password=access_key_from_key_vault,
+                decode_responses=True)</code></pre>`],
+["redis","Senior","What happened with Redis licensing, and what is Valkey?",`<p><b>In simple words:</b> Redis was BSD-licensed open source. In 2024 (Redis 7.4) it moved to source-available licenses (RSALv2 / SSPLv1), which restrict offering Redis as a managed service. In response, the Linux Foundation started <b>Valkey</b>, a BSD-licensed fork of Redis 7.2 backed by several cloud providers. In 2025, <b>Redis 8</b> added <b>AGPLv3</b> as an open-source license option.</p><ul><li>For app developers using Redis as a cache or session store, day-to-day usage and client libraries are basically the same.</li><li>Managed services (Azure, AWS, Google Cloud) handle licensing for you; some now offer Valkey.</li><li>In an interview, just show you're aware of it and that the API is compatible for common use.</li></ul>`],
 ["db","Junior","SQL vs NoSQL: when to use each?",`<p>SQL (PostgreSQL, Azure SQL) for relational data, joins and ACID transactions (orders, users, payments). NoSQL (Cosmos DB, MongoDB, Redis) for flexible schemas, huge scale with simple access patterns, caching, or document data. Many systems use both.</p>`],
 ["db","Junior","What are REST principles and common HTTP status codes?",`<p>Resources as nouns (<code>/users/42</code>), HTTP verbs for actions, stateless requests. Codes: 200 OK, 201 Created, 204 No Content, 400 Bad Request, 401 Unauthenticated, 403 Forbidden, 404 Not Found, 409 Conflict, 422 Validation error, 429 Too Many Requests, 500 Server error.</p>`],
 ["db","Junior","PUT vs PATCH? Which methods are idempotent?",`<p>PUT replaces the whole resource; PATCH changes some fields. GET, PUT, DELETE are idempotent (repeating gives the same result); POST is not, so use idempotency keys for payments.</p>`],
