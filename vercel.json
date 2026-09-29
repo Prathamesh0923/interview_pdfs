@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/Full_Stack_Interview_Bank.html" }
+  ]
+}
