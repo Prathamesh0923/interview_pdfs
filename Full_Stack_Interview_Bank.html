@@ -31,6 +31,10 @@
   --jr:#4cc28d; --mid:#e3aa4f; --sr:#ef7d75; --code-bg:#111827;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img,svg{max-width:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:0 48px}
 .wrap{max-width:1180px;margin:0 auto}
 header.top{padding-block:28px 18px;display:grid;gap:10px}
@@ -61,10 +65,12 @@ nav.cats{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);align-sel
 .cat .mini{grid-column:1/-1;height:3px;background:var(--surface-2);border-radius:2px;overflow:hidden}
 .cat .mini span{display:block;height:100%;background:var(--known)}
 
-main{min-width:0;display:grid;gap:28px}
+main{min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+main>*,.qlist>*,.ans>*,#sections>*{min-width:0}
+#sections{display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
 .section h2{font-family:var(--display);font-weight:700;font-size:22px;margin:0 0 4px;letter-spacing:-.005em}
 .section .sub{color:var(--muted);margin:0 0 12px;font-size:14px;max-width:70ch}
-.qlist{display:grid;gap:8px}
+.qlist{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
 details.q{background:var(--surface);border:1px solid var(--line);border-radius:10px}
 details.q[open]{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
 details.q.known{border-left:3px solid var(--known)}
@@ -74,7 +80,7 @@ summary::-webkit-details-marker{display:none}
 .qt{font-weight:600;font-size:15px}
 .lvl{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:4px;border:1px solid currentColor;white-space:nowrap}
 .lvl.Junior{color:var(--jr)} .lvl.Mid{color:var(--mid)} .lvl.Senior{color:var(--sr)}
-.ans{padding:0 14px 14px 50px;display:grid;gap:10px}
+.ans{padding:0 14px 14px 50px;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 .ans p,.ans ul,.ans ol{margin:0;max-width:75ch}
 .ans ul,.ans ol{padding-left:20px}
 .ans li{margin:2px 0}
@@ -95,13 +101,15 @@ pre code{background:none;padding:0;font-size:inherit}
 .practice{background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:18px;display:grid;gap:12px}
 .practice .pq{font-family:var(--display);font-size:20px;font-weight:500;text-wrap:balance}
 @media (max-width:820px){
-  .layout{grid-template-columns:1fr}
-  nav.cats{position:static;display:flex;overflow-x:auto;gap:6px;padding-bottom:4px}
+  .layout{grid-template-columns:minmax(0,1fr)}
+  nav.cats{min-width:0;position:static;display:flex;overflow-x:auto;gap:6px;padding-bottom:4px}
   .cat{grid-template-columns:auto auto;white-space:nowrap;border:1px solid var(--line);background:var(--surface)}
   .cat .mini{display:none}
   .ans{padding-left:14px}
   summary{grid-template-columns:1fr auto}
   .qn{display:none}
+  pre{font-size:12px;padding:10px}
+  .toolbar .chip,.toolbar .btn{padding:6px 10px}
 }
 @media print{
   body{background:#fff;color:#000;font-size:11pt;padding-inline:0}
@@ -122,7 +130,7 @@ pre code{background:none;padding:0;font-size:inherit}
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="eyebrow">Question bank · Python · React · Next.js · HTML/CSS · Azure · Auth architecture</div>
+    <div class="eyebrow">Question bank · Python · SQL · PostgreSQL · React · Next.js · HTML/CSS · Azure · Auth · DSA</div>
     <h1>Full Stack Interview Bank</h1>
     <p class="lede">The questions that come up most often in full stack interviews, gathered from published 2026 interview guides and grouped by topic. Each one has a short model answer. Search, filter by level, mark what you know, or run a random practice round.</p>
     <div class="stats"><span><b id="st-total">0</b> questions</span><span><b id="st-known">0</b> marked known</span><span><b id="st-shown">0</b> shown</span></div>
@@ -305,6 +313,8 @@ const CATS = [
   {id:"pycore", name:"Python Coding", sub:"Python coding round: predict-the-output traps, lists and dicts, OOP, iterators and generators, decorators, concurrency, file handling, sorting, testing."},
   {id:"pyweb", name:"Python Backend (FastAPI / Django)", sub:"API design and framework questions for the backend half of the role."},
   {id:"pycode", name:"Backend Coding (Python / SQL)", sub:"Write the endpoint: auth, password reset, rate limiting, async, SQL queries."},
+  {id:"sql", name:"SQL Queries", sub:"Write-the-query questions: joins, grouping, nth highest salary, duplicates, window functions, CTEs, running totals, upserts. PostgreSQL syntax, with sample tables and results."},
+  {id:"postgres", name:"PostgreSQL", sub:"PostgreSQL concepts: data types, JSONB, index types, EXPLAIN, MVCC, VACUUM, locking, partitioning, replication, pooling, security, Python drivers, Azure."},
   {id:"db", name:"Databases & APIs", sub:"SQL, indexing, transactions, REST vs GraphQL, caching."},
   {id:"auth", name:"Auth Architecture", sub:"Signup, login, email verification, password reset, sessions vs JWT, OAuth, MFA. Frequently asked as a system design round."},
   {id:"azure", name:"Azure", sub:"App Service, Functions, Entra ID, Key Vault, storage, DevOps."},
@@ -661,6 +671,623 @@ def test_read_me():
     response = client.get("/me")                  # call the endpoint
     assert response.status_code == 200           # it worked
     assert response.json()["email"] == "test@example.com"</code></pre><p>Also useful: a test database that is rolled back after each test, and fixtures that create sample data.</p>`],
+// ---------- SQL ----------
+["sql","Junior","SQL basics: SELECT, WHERE, ORDER BY and LIMIT.",`<p><b>How it works:</b> SELECT picks the columns, FROM picks the table, WHERE keeps only matching rows, ORDER BY sorts them, and LIMIT keeps only the first few.</p><pre><code>-- employees(id, name, dept, salary)
+SELECT name, salary           -- the columns we want
+FROM employees                -- the table to read from
+WHERE dept = 'IT'             -- keep only IT employees
+  AND salary > 50000          -- and only those earning more than 50,000
+ORDER BY salary DESC          -- highest salary first
+LIMIT 5;                      -- only the top 5 rows
+
+-- Pattern matching and ranges
+SELECT * FROM employees
+WHERE name ILIKE 'a%'                 -- names starting with a/A (ILIKE ignores case)
+  AND salary BETWEEN 40000 AND 90000  -- inclusive range
+  AND dept IN ('IT', 'HR');           -- any of these values</code></pre>`],
+["sql","Junior","What does DISTINCT do? Count unique values.",`<p><b>How it works:</b> DISTINCT removes duplicate rows from the result. COUNT(DISTINCT col) counts how many different values a column has.</p><pre><code>SELECT DISTINCT dept           -- each department listed once
+FROM employees;
+
+SELECT COUNT(DISTINCT dept)    -- how many different departments
+FROM employees;
+-- Result: 3
+
+-- PostgreSQL extra: one row per dept (the highest paid person)
+SELECT DISTINCT ON (dept) dept, name, salary
+FROM employees
+ORDER BY dept, salary DESC;    -- DISTINCT ON keeps the FIRST row of each dept</code></pre>`],
+["sql","Junior","GROUP BY with COUNT, SUM, AVG, MIN, MAX and HAVING.",`<p><b>How it works:</b> GROUP BY puts rows with the same value into one bucket. Aggregate functions (COUNT, SUM, AVG…) then give one number per bucket. HAVING filters the buckets.</p><pre><code>SELECT dept,                        -- one row per department
+       COUNT(*)          AS people, -- how many employees
+       ROUND(AVG(salary)) AS avg_pay, -- average salary
+       MAX(salary)       AS top_pay -- highest salary
+FROM employees
+GROUP BY dept                       -- make one bucket per department
+HAVING COUNT(*) > 2                 -- keep only departments with more than 2 people
+ORDER BY avg_pay DESC;
+-- Result:
+-- dept | people | avg_pay | top_pay
+-- IT   |      4 |   72500 |   95000</code></pre><p class="tip"><b>Rule:</b> every column in SELECT must be inside an aggregate or listed in GROUP BY.</p>`],
+["sql","Junior","WHERE vs HAVING: what is the difference?",`<p><b>How it works:</b> WHERE filters single rows <i>before</i> grouping. HAVING filters groups <i>after</i> grouping, so it can use COUNT, SUM, etc.</p><pre><code>SELECT dept, AVG(salary) AS avg_pay
+FROM employees
+WHERE salary > 30000        -- step 1: drop low-paid rows (row filter)
+GROUP BY dept               -- step 2: group what is left
+HAVING AVG(salary) > 60000; -- step 3: keep groups with high average (group filter)
+
+-- WRONG: WHERE AVG(salary) > 60000  -> error, aggregates are not allowed in WHERE</code></pre>`],
+["sql","Junior","Explain INNER, LEFT, RIGHT, FULL OUTER and CROSS JOIN with a tiny example.",`<p><b>How it works:</b> A join puts rows from two tables side by side when a condition matches. The join type decides what happens to rows that have no match.</p><pre><code>-- customers            orders
+-- id | name            id | customer_id | amount
+--  1 | Ana              10 |           1 |    100
+--  2 | Bo               11 |           1 |     50
+--  3 | Cy               12 |           9 |     70   (customer 9 does not exist)
+
+SELECT c.name, o.amount
+FROM customers c
+INNER JOIN orders o ON o.customer_id = c.id;  -- only rows that match on both sides
+-- Ana 100, Ana 50
+
+-- LEFT JOIN  : all customers, order columns NULL if none  -> Ana 100, Ana 50, Bo NULL, Cy NULL
+-- RIGHT JOIN : all orders, customer NULL if none          -> Ana 100, Ana 50, NULL 70
+-- FULL JOIN  : everything from both sides                 -> all 5 rows above
+-- CROSS JOIN : every customer paired with every order     -> 3 x 3 = 9 rows</code></pre>`],
+["sql","Mid","Self join: find employees who earn more than their manager.",`<p><b>How it works:</b> We join the employees table to itself. One copy plays "employee", the other plays "manager", linked by manager_id.</p><pre><code>-- employees(id, name, salary, manager_id)
+SELECT e.name   AS employee,
+       e.salary AS emp_salary,
+       m.name   AS manager,
+       m.salary AS mgr_salary
+FROM employees e                      -- copy 1: the employee
+JOIN employees m                      -- copy 2: the manager
+  ON e.manager_id = m.id              -- link each employee to their manager
+WHERE e.salary > m.salary;            -- keep only when employee earns more
+-- Result:
+-- employee | emp_salary | manager | mgr_salary
+-- Joe      |      70000 | Sam     |      60000</code></pre>`],
+["sql","Mid","Find the Nth highest salary (3 ways). Example: 2nd highest.",`<p><b>How it works:</b> Sort distinct salaries from high to low and skip the first N-1. DENSE_RANK is the safest when salaries repeat.</p><pre><code>-- Way 1: LIMIT / OFFSET
+SELECT DISTINCT salary
+FROM employees
+ORDER BY salary DESC   -- highest first
+LIMIT 1 OFFSET 1;      -- skip 1 row, take the next -> 2nd highest
+
+-- Way 2: subquery
+SELECT MAX(salary)
+FROM employees
+WHERE salary &lt; (SELECT MAX(salary) FROM employees);  -- highest below the top one
+
+-- Way 3: DENSE_RANK (works for any N, handles ties)
+SELECT DISTINCT salary
+FROM (
+  SELECT salary,
+         DENSE_RANK() OVER (ORDER BY salary DESC) AS rnk  -- 1, 2, 3... ties share a rank
+  FROM employees
+) ranked
+WHERE rnk = 2;         -- change 2 to any N
+-- salaries 100, 100, 90, 80  ->  Result: 90</code></pre>`],
+["sql","Mid","Highest paid employee in each department.",`<p><b>How it works:</b> Rank employees inside each department by salary, then keep rank 1. PARTITION BY restarts the ranking for every department.</p><pre><code>SELECT dept, name, salary
+FROM (
+  SELECT dept, name, salary,
+         RANK() OVER (
+           PARTITION BY dept        -- restart numbering for each department
+           ORDER BY salary DESC     -- highest salary gets rank 1
+         ) AS rnk
+  FROM employees
+) t
+WHERE rnk = 1;                      -- keeps ties too (two people with the same top pay)
+
+-- Other way: join to the max per department
+SELECT e.dept, e.name, e.salary
+FROM employees e
+JOIN (SELECT dept, MAX(salary) AS max_sal FROM employees GROUP BY dept) m
+  ON m.dept = e.dept AND m.max_sal = e.salary;</code></pre>`],
+["sql","Mid","Top 3 products by sales in each category (top N per group).",`<p><b>How it works:</b> Number the rows inside each category with ROW_NUMBER, ordered by sales, then keep numbers 1 to 3.</p><pre><code>WITH ranked AS (                         -- a named temporary result (CTE)
+  SELECT category, product, total_sales,
+         ROW_NUMBER() OVER (
+           PARTITION BY category         -- numbering starts again per category
+           ORDER BY total_sales DESC     -- best seller = 1
+         ) AS rn
+  FROM product_sales
+)
+SELECT category, product, total_sales
+FROM ranked
+WHERE rn &lt;= 3                            -- top 3 per category
+ORDER BY category, rn;</code></pre>`],
+["sql","Mid","Find duplicate emails, then delete duplicates but keep one row.",`<p><b>How it works:</b> GROUP BY + HAVING COUNT(*) > 1 shows values that appear more than once. To delete, number the copies and remove every copy except number 1.</p><pre><code>-- 1. Find duplicates
+SELECT email, COUNT(*) AS copies
+FROM users
+GROUP BY email
+HAVING COUNT(*) > 1;           -- only emails that appear more than once
+
+-- 2. Delete duplicates, keep the row with the smallest id
+DELETE FROM users
+WHERE id IN (
+  SELECT id
+  FROM (
+    SELECT id,
+           ROW_NUMBER() OVER (PARTITION BY email ORDER BY id) AS rn  -- 1 = oldest copy
+    FROM users
+  ) numbered
+  WHERE rn > 1                 -- every extra copy
+);
+
+-- 3. Stop it happening again
+ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email);</code></pre>`],
+["sql","Junior","Find customers who never placed an order.",`<p><b>How it works:</b> LEFT JOIN keeps every customer; customers with no order get NULL in the order columns, so we keep those NULL rows. NOT EXISTS says the same thing directly.</p><pre><code>-- Way 1: LEFT JOIN + IS NULL
+SELECT c.id, c.name
+FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.id  -- keep all customers
+WHERE o.id IS NULL;                          -- no matching order found
+
+-- Way 2: NOT EXISTS (clear and fast)
+SELECT c.id, c.name
+FROM customers c
+WHERE NOT EXISTS (
+  SELECT 1 FROM orders o WHERE o.customer_id = c.id  -- is there any order for this customer?
+);
+-- Result: Bo, Cy</code></pre>`],
+["sql","Mid","IN vs EXISTS, and the NULL trap with NOT IN.",`<p><b>How it works:</b> IN compares against a list of values. EXISTS just checks whether the subquery returns any row, and stops at the first match. NOT IN returns <b>no rows at all</b> if the list contains a NULL.</p><pre><code>SELECT name FROM customers
+WHERE id IN (SELECT customer_id FROM orders);        -- customers who ordered
+
+SELECT name FROM customers c
+WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);  -- same result
+
+-- The trap:
+SELECT name FROM customers
+WHERE id NOT IN (SELECT customer_id FROM orders);
+-- If any orders.customer_id is NULL, this returns 0 rows!
+-- Why: "id &lt;&gt; NULL" is unknown, not true, so no row passes.
+-- Fix: use NOT EXISTS, or add WHERE customer_id IS NOT NULL in the subquery.</code></pre>`],
+["sql","Junior","UNION vs UNION ALL.",`<p><b>How it works:</b> Both stack the results of two queries on top of each other. UNION removes duplicate rows (slower, it has to compare). UNION ALL keeps everything (faster).</p><pre><code>SELECT email FROM customers
+UNION                 -- duplicates removed
+SELECT email FROM newsletter_subscribers;
+
+SELECT email FROM customers
+UNION ALL             -- duplicates kept
+SELECT email FROM newsletter_subscribers;
+-- Both queries must return the same number of columns with compatible types.
+-- Related: INTERSECT (in both), EXCEPT (in first but not second)</code></pre>`],
+["sql","Mid","Subquery vs CTE (WITH clause): when to use which?",`<p><b>How it works:</b> Both are a query inside a query. A CTE gives the inner query a name at the top, which makes long queries much easier to read and lets you reuse it.</p><pre><code>-- Subquery version
+SELECT name, total
+FROM (
+  SELECT customer_id, SUM(amount) AS total FROM orders GROUP BY customer_id
+) t
+JOIN customers c ON c.id = t.customer_id
+WHERE total > 1000;
+
+-- Same thing with a CTE
+WITH customer_totals AS (              -- step 1: total spent per customer
+  SELECT customer_id, SUM(amount) AS total
+  FROM orders
+  GROUP BY customer_id
+)
+SELECT c.name, ct.total                -- step 2: use it like a table
+FROM customer_totals ct
+JOIN customers c ON c.id = ct.customer_id
+WHERE ct.total > 1000;</code></pre><p>Performance is usually the same in PostgreSQL 12+ (simple CTEs are inlined).</p>`],
+["sql","Senior","Recursive CTE: show the full reporting chain (org chart) under a manager.",`<p><b>How it works:</b> A recursive CTE has two parts: a starting row (the boss), and a step that finds the people who report to the rows found so far. It repeats until no new rows are found.</p><pre><code>WITH RECURSIVE team AS (
+  -- starting point: the CEO (no manager)
+  SELECT id, name, manager_id, 1 AS level
+  FROM employees
+  WHERE manager_id IS NULL
+
+  UNION ALL
+
+  -- repeat: find everyone whose manager is already in "team"
+  SELECT e.id, e.name, e.manager_id, t.level + 1
+  FROM employees e
+  JOIN team t ON e.manager_id = t.id
+)
+SELECT level, name
+FROM team
+ORDER BY level, name;
+-- Result:
+-- level | name
+--     1 | Sam      (CEO)
+--     2 | Joe
+--     2 | Mia
+--     3 | Raj</code></pre>`],
+["sql","Mid","ROW_NUMBER vs RANK vs DENSE_RANK.",`<p><b>How it works:</b> All three number rows in order. They only differ when there is a tie.</p><pre><code>SELECT name, score,
+       ROW_NUMBER() OVER (ORDER BY score DESC) AS row_num,    -- always 1,2,3,4 (ties get different numbers)
+       RANK()       OVER (ORDER BY score DESC) AS rnk,        -- ties share, then a gap
+       DENSE_RANK() OVER (ORDER BY score DESC) AS dense_rnk   -- ties share, no gap
+FROM results;
+-- Result:
+-- name | score | row_num | rnk | dense_rnk
+-- Ana  |    90 |       1 |   1 |         1
+-- Bo   |    90 |       2 |   1 |         1
+-- Cy   |    80 |       3 |   3 |         2
+-- Dev  |    70 |       4 |   4 |         3</code></pre>`],
+["sql","Mid","Running total and 7-day moving average.",`<p><b>How it works:</b> SUM() OVER (ORDER BY day) adds up everything from the first day to the current day. A frame like ROWS BETWEEN 6 PRECEDING AND CURRENT ROW looks at only the last 7 rows.</p><pre><code>SELECT day,
+       amount,
+       SUM(amount) OVER (ORDER BY day) AS running_total,       -- total so far
+       ROUND(AVG(amount) OVER (
+         ORDER BY day
+         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW              -- this row + 6 before it
+       ), 2) AS moving_avg_7d
+FROM daily_sales
+ORDER BY day;
+-- day        | amount | running_total
+-- 2026-09-01 |    100 |           100
+-- 2026-09-02 |     50 |           150
+-- 2026-09-03 |     70 |           220</code></pre>`],
+["sql","Mid","Monthly revenue and month-over-month change (date_trunc, LAG).",`<p><b>How it works:</b> date_trunc('month', ...) turns every date into the first day of its month, so we can group by month. LAG looks at the previous row's value, so we can subtract.</p><pre><code>WITH monthly AS (
+  SELECT date_trunc('month', created_at)::date AS month,  -- 2026-09-17 -> 2026-09-01
+         SUM(amount) AS revenue
+  FROM orders
+  GROUP BY 1                                              -- group by the first column
+)
+SELECT month,
+       revenue,
+       LAG(revenue) OVER (ORDER BY month) AS prev_revenue,          -- last month's value
+       revenue - LAG(revenue) OVER (ORDER BY month) AS change,
+       ROUND(100.0 * (revenue - LAG(revenue) OVER (ORDER BY month))
+             / NULLIF(LAG(revenue) OVER (ORDER BY month), 0), 1) AS pct_change  -- NULLIF avoids divide by zero
+FROM monthly
+ORDER BY month;
+-- LEAD() is the opposite: it looks at the NEXT row.</code></pre>`],
+["sql","Senior","Find users who logged in on 3 or more consecutive days.",`<p><b>How it works:</b> Number each user's login days 1, 2, 3… and subtract that number from the date. For days in a row, the result stays the same, so it works as a "streak id" we can group by.</p><pre><code>WITH days AS (
+  SELECT DISTINCT user_id, login_at::date AS day   -- one row per user per day
+  FROM logins
+),
+grouped AS (
+  SELECT user_id, day,
+         day - (ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY day))::int AS streak_id
+         -- Sep 1 - 1 = Aug 31, Sep 2 - 2 = Aug 31, Sep 3 - 3 = Aug 31  -> same streak
+  FROM days
+)
+SELECT user_id,
+       MIN(day) AS streak_start,
+       MAX(day) AS streak_end,
+       COUNT(*) AS days_in_row
+FROM grouped
+GROUP BY user_id, streak_id
+HAVING COUNT(*) >= 3;          -- streaks of 3 days or more</code></pre>`],
+["sql","Mid","Percentage of total: each department's share of the salary bill.",`<p><b>How it works:</b> SUM(...) OVER () with empty brackets means "the sum over all rows", so we can divide each group by the grand total in the same query.</p><pre><code>SELECT dept,
+       SUM(salary) AS dept_total,
+       ROUND(100.0 * SUM(salary) / SUM(SUM(salary)) OVER (), 1) AS pct_of_total
+       -- inner SUM = this department, outer SUM() OVER () = all departments
+FROM employees
+GROUP BY dept
+ORDER BY pct_of_total DESC;
+-- dept | dept_total | pct_of_total
+-- IT   |     290000 |         52.7</code></pre><p class="tip"><b>Tip:</b> use 100.0 (not 100) so PostgreSQL does decimal division, not integer division.</p>`],
+["sql","Senior","Median and percentiles in PostgreSQL.",`<p><b>How it works:</b> percentile_cont(0.5) returns the middle value (averaging the two middle values if the count is even). Change 0.5 to 0.9 for the 90th percentile.</p><pre><code>SELECT dept,
+       percentile_cont(0.5) WITHIN GROUP (ORDER BY salary) AS median_salary,
+       percentile_cont(0.9) WITHIN GROUP (ORDER BY salary) AS p90_salary
+FROM employees
+GROUP BY dept;
+-- salaries 40, 50, 60, 100  ->  median = 55
+-- percentile_disc returns an actual value from the data instead of averaging.</code></pre>`],
+["sql","Mid","Pivot rows into columns (orders per status per month).",`<p><b>How it works:</b> Group by month, then count each status into its own column using CASE or PostgreSQL's FILTER clause.</p><pre><code>SELECT date_trunc('month', created_at)::date AS month,
+       COUNT(*) FILTER (WHERE status = 'paid')     AS paid,      -- count only paid rows
+       COUNT(*) FILTER (WHERE status = 'refunded') AS refunded,
+       SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS paid_amount  -- CASE works in any database
+FROM orders
+GROUP BY 1
+ORDER BY 1;
+-- month      | paid | refunded | paid_amount
+-- 2026-08-01 |  120 |        4 |       18500</code></pre>`],
+["sql","Junior","How do you handle NULL? IS NULL, COALESCE, NULLIF.",`<p><b>How it works:</b> NULL means "unknown". Anything compared with NULL using = gives unknown, so you must use IS NULL. COALESCE picks the first non-NULL value.</p><pre><code>SELECT * FROM users WHERE phone IS NULL;       -- correct
+SELECT * FROM users WHERE phone = NULL;        -- WRONG: always returns nothing
+
+SELECT name, COALESCE(phone, 'not given') AS phone  -- replace NULL with a default
+FROM users;
+
+SELECT total / NULLIF(count, 0) FROM stats;    -- NULLIF turns 0 into NULL, avoids divide by zero
+
+-- Aggregates skip NULLs: COUNT(phone) counts only non-NULL, COUNT(*) counts all rows.</code></pre>`],
+["sql","Junior","DELETE vs TRUNCATE vs DROP.",`<p><b>How it works:</b> They remove different things.</p><ul><li><b>DELETE</b>: removes chosen rows (can use WHERE), row by row, fires triggers, can be rolled back.</li><li><b>TRUNCATE</b>: removes all rows at once, very fast, resets space; the table stays. In PostgreSQL it can also be rolled back inside a transaction.</li><li><b>DROP</b>: removes the whole table, its data and structure.</li></ul><pre><code>DELETE FROM orders WHERE created_at &lt; '2020-01-01';  -- only old orders
+TRUNCATE TABLE logs RESTART IDENTITY;                 -- empty the table, reset ids
+DROP TABLE IF EXISTS temp_import;                     -- table is gone</code></pre>`],
+["sql","Junior","Primary key vs foreign key vs unique vs check constraints.",`<p><b>How it works:</b> Constraints are rules the database enforces so bad data can't get in.</p><pre><code>CREATE TABLE users (
+  id         BIGSERIAL PRIMARY KEY,          -- unique + not null, identifies each row
+  email      TEXT NOT NULL UNIQUE,           -- no two users with the same email (one NULL allowed if nullable)
+  age        INT CHECK (age >= 18),          -- custom rule
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE orders (
+  id      BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL
+          REFERENCES users(id)               -- foreign key: must point to a real user
+          ON DELETE CASCADE,                 -- deleting a user deletes their orders
+  amount  NUMERIC(10,2) NOT NULL
+);</code></pre><p>A table has one primary key but can have many UNIQUE constraints. Index foreign key columns yourself (PostgreSQL doesn't do it automatically).</p>`],
+["sql","Mid","UPDATE using values from another table (UPDATE with JOIN).",`<p><b>How it works:</b> PostgreSQL uses UPDATE … FROM to bring in a second table, and the WHERE clause links the two.</p><pre><code>-- Give everyone in the 'Sales' department a 10% raise
+UPDATE employees e
+SET salary = e.salary * 1.10          -- new value
+FROM departments d                    -- the second table
+WHERE d.id = e.dept_id                -- how the tables connect
+  AND d.name = 'Sales'                -- which rows to change
+RETURNING e.id, e.salary;             -- PostgreSQL: show the updated rows</code></pre><p class="tip"><b>Tip:</b> run the same WHERE as a SELECT first, and do it inside BEGIN … COMMIT so you can ROLLBACK.</p>`],
+["sql","Mid","UPSERT: insert a row, or update it if it already exists.",`<p><b>How it works:</b> INSERT … ON CONFLICT tries to insert; if the unique key already exists it runs the UPDATE instead. EXCLUDED means "the row we tried to insert".</p><pre><code>INSERT INTO product_stock (product_id, qty)
+VALUES (42, 5)
+ON CONFLICT (product_id)                -- needs a UNIQUE or PRIMARY KEY on product_id
+DO UPDATE SET qty = product_stock.qty + EXCLUDED.qty;  -- add to the existing quantity
+
+-- Insert only if missing, otherwise do nothing
+INSERT INTO tags (name) VALUES ('python')
+ON CONFLICT (name) DO NOTHING;</code></pre>`],
+["sql","Junior","In what order does SQL run the clauses of a query?",`<p><b>How it works:</b> SQL is written starting with SELECT, but the database runs it in a different order. This explains why you can't use a SELECT alias in WHERE.</p><pre><code>-- Written order:   SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY → LIMIT
+-- Run order:
+--   1. FROM / JOIN   pick tables and join them
+--   2. WHERE         filter rows
+--   3. GROUP BY      make groups
+--   4. HAVING        filter groups
+--   5. SELECT        compute columns and aliases (window functions run here)
+--   6. DISTINCT      remove duplicates
+--   7. ORDER BY      sort (can use SELECT aliases)
+--   8. LIMIT/OFFSET  cut the result
+
+SELECT salary * 12 AS yearly FROM employees
+WHERE yearly > 100000;        -- ERROR: alias doesn't exist yet at WHERE
+-- Fix: WHERE salary * 12 > 100000</code></pre>`],
+["sql","Mid","Count orders per customer including customers with zero orders.",`<p><b>How it works:</b> LEFT JOIN keeps customers with no orders. COUNT(o.id) counts only real orders, so those customers get 0 (COUNT(*) would wrongly give 1).</p><pre><code>SELECT c.name,
+       COUNT(o.id)               AS order_count,    -- 0 when no orders
+       COALESCE(SUM(o.amount), 0) AS total_spent    -- SUM of nothing is NULL, so default to 0
+FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.id
+GROUP BY c.id, c.name
+ORDER BY total_spent DESC;
+-- name | order_count | total_spent
+-- Ana  |           2 |         150
+-- Bo   |           0 |           0</code></pre>`],
+["sql","Mid","Find records from the last 7 days / this month / today.",`<p><b>How it works:</b> now() is the current timestamp; subtracting an interval gives a past moment. date_trunc rounds down to the start of the day or month.</p><pre><code>SELECT * FROM orders
+WHERE created_at >= now() - interval '7 days';            -- last 7 days
+
+SELECT * FROM orders
+WHERE created_at >= date_trunc('month', now());           -- since the 1st of this month
+
+SELECT * FROM orders
+WHERE created_at >= current_date                          -- today from midnight
+  AND created_at &lt; current_date + 1;                      -- until tomorrow midnight
+
+-- Avoid WHERE created_at::date = current_date on big tables: the cast can stop the index being used.</code></pre>`],
+["sql","Senior","A query is slow. How do you find out why and fix it?",`<p><b>How it works:</b> Ask PostgreSQL to show its plan with EXPLAIN ANALYZE, look for slow steps, then usually add the right index or rewrite the query.</p><pre><code>EXPLAIN ANALYZE
+SELECT * FROM orders WHERE customer_id = 42 ORDER BY created_at DESC LIMIT 10;
+-- Look for: "Seq Scan" on a big table (reading every row),
+--           big gaps between estimated and actual rows,
+--           slow Sort or Nested Loop steps.
+
+CREATE INDEX CONCURRENTLY idx_orders_customer_created
+  ON orders (customer_id, created_at DESC);   -- matches the WHERE + ORDER BY
+-- Re-run EXPLAIN ANALYZE: should now show "Index Scan".</code></pre><ul><li>Select only needed columns, not SELECT *.</li><li>Avoid functions on indexed columns in WHERE.</li><li>Keep statistics fresh with ANALYZE; paginate with keyset instead of big OFFSETs.</li></ul>`],
+// ---------- PostgreSQL ----------
+["postgres","Junior","What is PostgreSQL, and why pick it over MySQL?",`<p><b>In simple words:</b> PostgreSQL (Postgres) is a free, open-source relational database. It is known for being strict about data correctness and for having many advanced features built in.</p><ul><li><b>Strong standards and correctness:</b> full ACID transactions, including for schema changes (you can roll back an ALTER TABLE).</li><li><b>Rich data types:</b> JSONB, arrays, UUID, ranges, full-text search, geospatial data (PostGIS).</li><li><b>Advanced SQL:</b> window functions, CTEs, partial and expression indexes, materialized views, row-level security.</li><li><b>Extensible:</b> extensions such as pg_stat_statements, pgvector (AI embeddings) and PostGIS.</li><li><b>MySQL</b> is also good: very common for simple read-heavy web apps and easy to host. Postgres is usually the default pick for new projects that need complex queries or JSON.</li></ul>`],
+["postgres","Junior","Which data types should you use for ids, text, time and money?",`<p><b>In simple words:</b> Pick the type that matches the data exactly, so the database can check it for you and store it efficiently.</p><pre><code>CREATE TABLE orders (
+  id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- auto-increment number (modern way)
+  public_id   UUID NOT NULL DEFAULT gen_random_uuid(),      -- random id safe to show in URLs
+  customer    TEXT NOT NULL,                                -- TEXT has no length limit, same speed as VARCHAR
+  code        VARCHAR(10),                                  -- use VARCHAR(n) only when a max length is a real rule
+  amount      NUMERIC(12, 2) NOT NULL,                      -- exact decimal: always use for money, never FLOAT
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),           -- stores time in UTC, converts for each user's timezone
+  is_paid     BOOLEAN NOT NULL DEFAULT false,
+  tags        TEXT[],                                       -- an array of text values
+  details     JSONB                                         -- flexible extra data
+);</code></pre><ul><li><b>SERIAL vs IDENTITY:</b> both auto-increment. SERIAL is the old shortcut; <code>GENERATED ... AS IDENTITY</code> is the SQL standard and is recommended now.</li><li><b>FLOAT for money is wrong:</b> <code>0.1 + 0.2</code> is not exactly 0.3 in floating point.</li><li><b>Always prefer TIMESTAMPTZ</b> over TIMESTAMP, so times from different timezones stay correct.</li></ul>`],
+["postgres","Mid","JSON vs JSONB, and how do you query JSONB?",`<p><b>In simple words:</b> JSON stores the text exactly as given. JSONB stores it in a parsed binary form, which is a little slower to write but much faster to search and can be indexed. Use JSONB almost always.</p><pre><code>-- a products table with a JSONB column
+CREATE TABLE products (id INT PRIMARY KEY, attrs JSONB);
+INSERT INTO products VALUES (1, '{"color": "red", "size": {"w": 10}, "tags": ["new"]}');
+
+SELECT attrs -> 'size'        FROM products;  -- {"w": 10}   (-> returns JSON)
+SELECT attrs ->> 'color'      FROM products;  -- red          (->> returns plain text)
+SELECT attrs -> 'size' ->> 'w' FROM products; -- 10           (go deeper step by step)
+
+-- @> means "contains": find products whose attrs include color red
+SELECT id FROM products WHERE attrs @> '{"color": "red"}';
+
+-- a GIN index makes @> searches fast on big tables
+CREATE INDEX idx_products_attrs ON products USING GIN (attrs);</code></pre><p class="tip"><b>Follow-up:</b> don't put everything in JSONB. Columns you filter, join or sort on often should be normal columns.</p>`],
+["postgres","Mid","What index types does PostgreSQL have and when do you use each?",`<p><b>In simple words:</b> An index is like the index at the back of a book: it helps the database find rows without reading the whole table. Different index types suit different kinds of data.</p><ul><li><b>B-tree</b> (default): equality and ranges on normal columns: <code>=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>BETWEEN</code>, <code>ORDER BY</code>. Use this 90% of the time.</li><li><b>Hash:</b> only <code>=</code> comparisons. Rarely better than B-tree.</li><li><b>GIN:</b> for values that contain many items: JSONB, arrays, full-text search.</li><li><b>GiST:</b> for geometry, ranges and "nearest" searches (PostGIS, overlapping time ranges).</li><li><b>BRIN:</b> tiny index for huge tables where data is stored in natural order, like log rows by time.</li></ul><pre><code>CREATE INDEX idx_users_email ON users (email);                 -- B-tree
+CREATE INDEX idx_posts_tags  ON posts USING GIN (tags);         -- GIN on an array
+CREATE INDEX idx_logs_time   ON logs  USING BRIN (created_at);  -- BRIN on a big log table</code></pre>`],
+["postgres","Mid","What are composite, partial and expression indexes?",`<p><b>In simple words:</b> A composite index covers several columns, a partial index covers only some rows, and an expression index covers a calculated value.</p><pre><code>-- Composite: helps WHERE user_id = ? AND created_at &gt; ?
+-- Column order matters: it also helps "WHERE user_id = ?" alone,
+-- but NOT "WHERE created_at &gt; ?" alone (leftmost-column rule).
+CREATE INDEX idx_orders_user_date ON orders (user_id, created_at);
+
+-- Partial: index only the rows you actually search (smaller and faster)
+CREATE INDEX idx_orders_unpaid ON orders (created_at) WHERE is_paid = false;
+
+-- Expression: makes case-insensitive email lookups use the index
+CREATE INDEX idx_users_lower_email ON users (lower(email));
+SELECT * FROM users WHERE lower(email) = 'ana@example.com';   -- uses the index
+
+-- Unique partial index: an email must be unique only among active users
+CREATE UNIQUE INDEX uniq_active_email ON users (email) WHERE deleted_at IS NULL;</code></pre>`],
+["postgres","Mid","How do you read EXPLAIN and EXPLAIN ANALYZE?",`<p><b>In simple words:</b> EXPLAIN shows the plan Postgres will use to run a query. EXPLAIN ANALYZE actually runs it and shows the real time and row counts, so you can see what is slow.</p><pre><code>EXPLAIN ANALYZE
+SELECT * FROM orders WHERE user_id = 42;
+
+-- Example output (simplified):
+-- Index Scan using idx_orders_user on orders
+--   (cost=0.43..8.45 rows=5 width=64)
+--   (actual time=0.020..0.031 rows=4 loops=1)
+-- Execution Time: 0.05 ms</code></pre><ul><li><b>Seq Scan:</b> reads the whole table. Fine for small tables, a warning sign on big ones.</li><li><b>Index Scan:</b> uses an index to jump to matching rows.</li><li><b>Index Only Scan:</b> answers from the index alone, without touching the table (fastest).</li><li><b>Bitmap Heap Scan:</b> collects many matching locations from an index, then reads them in bulk. Used when many rows match.</li><li><b>cost:</b> the planner's estimate (startup..total), not milliseconds.</li><li><b>rows estimate vs actual:</b> a big difference means outdated statistics; run <code>ANALYZE table_name;</code>.</li></ul><p class="tip"><b>Careful:</b> EXPLAIN ANALYZE really runs the query. Wrap an UPDATE or DELETE in <code>BEGIN; ... ROLLBACK;</code>.</p>`],
+["postgres","Mid","What is MVCC?",`<p><b>In simple words:</b> MVCC (Multi-Version Concurrency Control) means Postgres keeps several versions of a row. Readers see a consistent snapshot, and writers create a new version instead of overwriting, so <b>readers never block writers and writers never block readers</b>.</p><ul><li>An UPDATE writes a new row version and marks the old one as dead. A DELETE only marks the row as dead.</li><li>Each transaction sees only the versions that were committed when its snapshot was taken.</li><li>Dead versions stay on disk until VACUUM cleans them up (see the next question).</li></ul>`],
+["postgres","Mid","What are VACUUM, autovacuum and table bloat?",`<p><b>In simple words:</b> Because of MVCC, updates and deletes leave dead rows behind. VACUUM cleans them so the space can be reused. Autovacuum is a background worker that does this automatically.</p><ul><li><b>Bloat:</b> too many dead rows make tables and indexes bigger and queries slower.</li><li><b>VACUUM:</b> marks dead space as reusable; doesn't lock out normal reads and writes.</li><li><b>VACUUM FULL:</b> rewrites the table to shrink it on disk, but locks the table. Avoid on busy production tables (use the pg_repack extension instead).</li><li><b>ANALYZE:</b> refreshes statistics so the planner makes good choices. Autovacuum also runs this.</li><li>VACUUM also prevents <b>transaction ID wraparound</b>, which is why autovacuum must never be switched off.</li></ul><pre><code>-- which tables have the most dead rows?
+SELECT relname, n_dead_tup, last_autovacuum
+FROM pg_stat_user_tables
+ORDER BY n_dead_tup DESC
+LIMIT 5;</code></pre>`],
+["postgres","Mid","Transactions and isolation levels in PostgreSQL.",`<p><b>In simple words:</b> A transaction groups several statements so they all succeed or all fail together. The isolation level decides how much one transaction can see of other transactions running at the same time.</p><pre><code>BEGIN;                                                        -- start the transaction
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;     -- take money from account 1
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;     -- give it to account 2
+COMMIT;                                                       -- save both (or ROLLBACK to undo both)
+
+BEGIN ISOLATION LEVEL SERIALIZABLE;   -- choose a stricter level for this transaction
+-- ...
+COMMIT;</code></pre><ul><li><b>Read Committed</b> (default): each statement sees data committed before that statement started.</li><li><b>Repeatable Read:</b> the whole transaction sees one snapshot from its start.</li><li><b>Serializable:</b> behaves as if transactions ran one after another. Postgres may abort one with a serialization error; your code must <b>retry</b> it.</li><li>Postgres treats Read Uncommitted as Read Committed; dirty reads never happen.</li></ul>`],
+["postgres","Senior","What do SELECT ... FOR UPDATE and SKIP LOCKED do? Build a job queue.",`<p><b>In simple words:</b> <code>FOR UPDATE</code> locks the selected rows so no other transaction can change them until you finish. <code>SKIP LOCKED</code> tells other workers to skip rows that are already locked instead of waiting. Together they let many workers take jobs from one table safely.</p><pre><code>-- each worker runs this to grab one job
+BEGIN;
+SELECT id, payload
+FROM jobs
+WHERE status = 'pending'          -- only jobs not done yet
+ORDER BY created_at               -- oldest first
+LIMIT 1
+FOR UPDATE SKIP LOCKED;           -- lock it; skip jobs other workers already took
+
+-- ...the worker does the job in the app...
+
+UPDATE jobs SET status = 'done' WHERE id = 123;   -- mark the job we took as done
+COMMIT;                                           -- releases the lock</code></pre><p>Also useful: <code>FOR UPDATE</code> alone to avoid "lost updates", for example when two requests read and change the same wallet balance at the same time.</p>`],
+["postgres","Senior","What causes a deadlock and how do you avoid it?",`<p><b>In simple words:</b> A deadlock is when transaction A waits for a row locked by B, while B waits for a row locked by A. Neither can continue. Postgres detects this after about a second (<code>deadlock_timeout</code>) and cancels one of them with an error.</p><pre><code>-- Transaction A                     -- Transaction B
+UPDATE accounts SET ... WHERE id=1;  UPDATE accounts SET ... WHERE id=2;
+UPDATE accounts SET ... WHERE id=2;  UPDATE accounts SET ... WHERE id=1;  -- deadlock!</code></pre><ul><li><b>Lock rows in the same order</b> everywhere (for example, always lowest id first).</li><li>Keep transactions short; don't wait on HTTP calls inside a transaction.</li><li>Retry the transaction when you get a deadlock error.</li><li>Find blocked queries with <code>pg_stat_activity</code> and <code>pg_blocking_pids(pid)</code>.</li></ul>`],
+["postgres","Mid","View vs materialized view?",`<p><b>In simple words:</b> A view is a saved query; it runs again every time you use it, so data is always fresh. A materialized view stores the result like a table; it's fast to read but must be refreshed to see new data.</p><pre><code>-- normal view: always up to date
+CREATE VIEW active_users AS
+SELECT id, email FROM users WHERE deleted_at IS NULL;
+
+-- materialized view: stores the result (good for heavy reports)
+CREATE MATERIALIZED VIEW daily_sales AS
+SELECT date_trunc('day', created_at) AS day, SUM(amount) AS total
+FROM orders
+GROUP BY 1;
+
+-- a unique index is required for CONCURRENTLY
+CREATE UNIQUE INDEX ON daily_sales (day);
+
+-- refresh without blocking people who are reading it
+REFRESH MATERIALIZED VIEW CONCURRENTLY daily_sales;</code></pre><p>Refresh on a schedule (cron, pg_cron, or an Azure Function timer).</p>`],
+["postgres","Mid","Functions, stored procedures and triggers: write an updated_at trigger.",`<p><b>In simple words:</b> A function is code stored in the database that returns a value. A procedure (<code>CALL</code>) can also control transactions. A trigger runs a function automatically when rows are inserted, updated or deleted.</p><pre><code>-- 1. a function that sets updated_at to the current time
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();   -- NEW is the row being saved
+  RETURN NEW;               -- save the changed row
+END;
+$$ LANGUAGE plpgsql;
+
+-- 2. run it before every update on users
+CREATE TRIGGER trg_users_updated_at
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+UPDATE users SET name = 'Ana' WHERE id = 1;   -- updated_at is now set automatically</code></pre><p class="tip"><b>Follow-up:</b> keep most business logic in the application; triggers are hidden and harder to test. They're good for audit logs and timestamps.</p>`],
+["postgres","Junior","Which constraints do you use to keep data correct?",`<p><b>In simple words:</b> Constraints are rules the database enforces, so bad data can't get in even if the application has a bug.</p><pre><code>CREATE TABLE users (
+  id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,  -- unique and not null
+  email TEXT NOT NULL UNIQUE,                             -- no two users with the same email
+  age   INT CHECK (age &gt;= 18)                             -- must be an adult
+);
+
+CREATE TABLE orders (
+  id      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id BIGINT NOT NULL
+          REFERENCES users(id) ON DELETE CASCADE,  -- deleting a user deletes their orders
+  amount  NUMERIC(12,2) CHECK (amount &gt; 0)
+);</code></pre><ul><li><b>ON DELETE options:</b> CASCADE (delete children), RESTRICT (block the delete), SET NULL.</li><li><b>EXCLUDE</b> constraint: blocks overlapping values, for example two bookings of the same room at overlapping times (uses GiST).</li><li>Index foreign key columns yourself; Postgres doesn't do it automatically.</li></ul>`],
+["postgres","Mid","What is a sequence? Why can IDs have gaps?",`<p><b>In simple words:</b> A sequence is a counter object that hands out the next number. IDENTITY and SERIAL columns use one behind the scenes.</p><pre><code>CREATE SEQUENCE invoice_no START 1000;
+SELECT nextval('invoice_no');   -- 1000
+SELECT nextval('invoice_no');   -- 1001
+SELECT currval('invoice_no');   -- 1001 (last value in this session)</code></pre><ul><li>Numbers are never given back: if a transaction rolls back, its number is lost, so <b>gaps are normal</b>.</li><li>If you need gap-free invoice numbers (for legal reasons), use a separate counter table updated inside the same transaction.</li></ul>`],
+["postgres","Senior","What is table partitioning? Partition a table by month.",`<p><b>In simple words:</b> Partitioning splits one big table into smaller child tables (for example one per month) that still look like one table. Queries that filter by date only read the matching partitions, and old data can be dropped instantly.</p><pre><code>-- parent table, split by created_at
+CREATE TABLE events (
+  id         BIGINT GENERATED ALWAYS AS IDENTITY,
+  created_at TIMESTAMPTZ NOT NULL,
+  data       JSONB
+) PARTITION BY RANGE (created_at);
+
+-- one partition per month
+CREATE TABLE events_2026_09 PARTITION OF events
+  FOR VALUES FROM ('2026-09-01') TO ('2026-10-01');
+CREATE TABLE events_2026_10 PARTITION OF events
+  FOR VALUES FROM ('2026-10-01') TO ('2026-11-01');
+
+-- only scans events_2026_09 (partition pruning)
+SELECT count(*) FROM events WHERE created_at &gt;= '2026-09-10' AND created_at &lt; '2026-09-20';
+
+-- removing old data is instant, no slow DELETE
+DROP TABLE events_2026_09;</code></pre><p>Other types: LIST (by region) and HASH (spread evenly). Use partitioning for very large tables (tens of millions of rows or more), not small ones.</p>`],
+["postgres","Senior","How does replication work? Read replicas vs logical replication.",`<p><b>In simple words:</b> Replication copies data from the main (primary) server to other servers, for safety and to spread out read traffic.</p><ul><li><b>Streaming (physical) replication:</b> the primary sends its WAL (write-ahead log) to replicas, which become exact copies. Replicas are read-only, and are used for <b>read replicas</b> and failover.</li><li><b>Synchronous vs asynchronous:</b> async is faster but a replica can be a little behind (replication lag); sync waits for the replica, so it's safer but slower.</li><li><b>Logical replication:</b> copies changes for chosen tables using publications and subscriptions. Useful for upgrades with little downtime, or sending data to another system.</li><li><b>In the app:</b> send writes to the primary and heavy reads (reports) to replicas. Remember lag: read your own writes from the primary.</li></ul>`],
+["postgres","Mid","Why use connection pooling (PgBouncer)?",`<p><b>In simple words:</b> Every Postgres connection is a separate server process that uses memory. Hundreds of app instances each opening many connections can overload the database. A pooler keeps a small set of real connections and shares them.</p><ul><li><b>App-side pool:</b> SQLAlchemy or psycopg pools inside each app process.</li><li><b>PgBouncer:</b> sits between apps and Postgres. In <b>transaction mode</b>, a real connection is only borrowed for the length of one transaction.</li><li>Serverless functions (Azure Functions) especially need a pooler, because each instance opens its own connections.</li><li>Azure Database for PostgreSQL Flexible Server has PgBouncer built in (port 6432).</li></ul><pre><code>SHOW max_connections;                     -- the server's limit, often 100
+SELECT count(*) FROM pg_stat_activity;    -- how many are open right now</code></pre>`],
+["postgres","Mid","How do you back up and restore PostgreSQL? What is PITR?",`<p><b>In simple words:</b> pg_dump makes a logical copy (SQL or archive file) of a database. For big production systems, you take physical base backups plus the WAL files, which lets you restore to any exact moment (Point-In-Time Recovery).</p><pre><code># logical backup of one database (compressed custom format)
+pg_dump -Fc -h localhost -U app mydb &gt; mydb.dump
+
+# restore it into another database
+pg_restore -d mydb_copy mydb.dump
+
+# plain SQL backup of just the schema
+pg_dump --schema-only mydb &gt; schema.sql</code></pre><ul><li><b>PITR:</b> base backup + archived WAL means you can restore to, for example, 10:41, one minute before someone ran a bad DELETE.</li><li>Managed services (Azure Flexible Server) do automated backups with PITR for you (7–35 days of retention).</li><li>A backup you've never restored isn't a backup; test restores regularly.</li></ul>`],
+["postgres","Mid","How does full-text search work in PostgreSQL?",`<p><b>In simple words:</b> Postgres can turn text into searchable words (a <code>tsvector</code>) and match them against a search query (a <code>tsquery</code>). It handles word forms like "running" matching "run", and a GIN index makes it fast.</p><pre><code>-- add a generated column that holds searchable words
+ALTER TABLE articles ADD COLUMN search tsvector
+  GENERATED ALWAYS AS (to_tsvector('english', title || ' ' || body)) STORED;
+
+-- index it
+CREATE INDEX idx_articles_search ON articles USING GIN (search);
+
+-- find articles about "postgres" AND "index", best matches first
+SELECT id, title, ts_rank(search, q) AS rank
+FROM articles, to_tsquery('english', 'postgres &amp; index') AS q
+WHERE search @@ q                  -- @@ means "matches"
+ORDER BY rank DESC
+LIMIT 10;
+
+-- for user-typed input use websearch_to_tsquery('english', 'postgres index -mysql')</code></pre><p>For typo-tolerant search use the pg_trgm extension; for very large search needs use Elasticsearch or Azure AI Search.</p>`],
+["postgres","Senior","How does Row-Level Security (RLS) help in a multi-tenant app?",`<p><b>In simple words:</b> RLS adds an automatic WHERE filter to every query on a table, so each tenant can only see its own rows, even if the application forgets the filter.</p><pre><code>-- turn on RLS for the table
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+
+-- only rows whose tenant_id equals the current tenant setting are visible
+CREATE POLICY tenant_isolation ON projects
+  USING (tenant_id = current_setting('app.tenant_id')::uuid);
+
+-- the app sets the tenant at the start of each transaction
+BEGIN;
+SET LOCAL app.tenant_id = '6f1c...';   -- the logged-in user's tenant
+SELECT * FROM projects;                  -- returns only this tenant's projects
+COMMIT;</code></pre><ul><li>Table owners and superusers bypass RLS by default; the app should connect as a normal role (or use <code>FORCE ROW LEVEL SECURITY</code>).</li><li>Still index <code>tenant_id</code>, because the policy is part of every query.</li></ul>`],
+["postgres","Senior","How do you find slow queries in production?",`<p><b>In simple words:</b> Turn on the pg_stat_statements extension. It records every query shape with how often it runs and how long it takes, so you can fix the ones costing the most total time.</p><pre><code>CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+
+-- queries using the most total time
+SELECT query,
+       calls,                                   -- how many times it ran
+       round(total_exec_time) AS total_ms,      -- time spent overall
+       round(mean_exec_time, 1) AS avg_ms       -- time per call
+FROM pg_stat_statements
+ORDER BY total_exec_time DESC
+LIMIT 10;
+
+-- what is running right now, and for how long?
+SELECT pid, now() - query_start AS running_for, state, query
+FROM pg_stat_activity
+WHERE state &lt;&gt; 'idle'
+ORDER BY running_for DESC;</code></pre><ul><li>Also set <code>log_min_duration_statement = 500</code> to log queries slower than 500 ms.</li><li>Then run EXPLAIN ANALYZE on the worst ones, add indexes or rewrite the query.</li><li>Stop a stuck query with <code>SELECT pg_cancel_backend(pid);</code>.</li></ul>`],
+["postgres","Senior","How do you run database migrations without downtime?",`<p><b>In simple words:</b> Avoid changes that lock a big table for a long time, and make changes in small steps that work with both the old and the new version of your app.</p><pre><code>-- 1. Adding a nullable column is instant
+ALTER TABLE users ADD COLUMN phone TEXT;
+
+-- (PG 11+) adding a column with a constant default is also instant
+ALTER TABLE users ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT true;
+
+-- 2. Build indexes without blocking writes (can't run inside a transaction)
+CREATE INDEX CONCURRENTLY idx_users_phone ON users (phone);
+
+-- 3. Add a constraint without a long lock: add it first, check existing rows later
+ALTER TABLE orders ADD CONSTRAINT fk_orders_user
+  FOREIGN KEY (user_id) REFERENCES users(id) NOT VALID;
+ALTER TABLE orders VALIDATE CONSTRAINT fk_orders_user;
+
+-- 4. Always set a lock timeout so a migration can't freeze the app
+SET lock_timeout = '5s';</code></pre><ul><li><b>Renaming a column:</b> add the new column, write to both, backfill in batches, switch reads, then drop the old one in a later release (expand and contract).</li><li>Use a migration tool: Alembic (Python), Prisma or Drizzle (Node), Flyway.</li></ul>`],
+["postgres","Mid","How do you use PostgreSQL from Python safely?",`<p><b>In simple words:</b> Use a driver (psycopg) or an ORM (SQLAlchemy). Always pass values as <b>parameters</b>, never by building the SQL string yourself, to prevent SQL injection. Reuse connections with a pool.</p><pre><code># psycopg 3 with a connection pool
+from psycopg_pool import ConnectionPool
+
+pool = ConnectionPool("postgresql://app:secret@localhost/mydb", min_size=1, max_size=10)
+
+def get_user_by_email(email):
+    with pool.connection() as conn:                 # borrow a connection from the pool
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, name FROM users WHERE email = %s",   # %s is a placeholder
+                (email,),                                        # the value is sent separately (safe)
+            )
+            return cur.fetchone()                    # one row or None
+
+print(get_user_by_email("ana@example.com"))   # (1, 'Ana')
+
+# WRONG, open to SQL injection:
+# cur.execute(f"SELECT * FROM users WHERE email = '{email}'")</code></pre><pre><code># SQLAlchemy 2.0 style
+from sqlalchemy import create_engine, text
+engine = create_engine("postgresql+psycopg://app:secret@localhost/mydb", pool_size=5)
+with engine.begin() as conn:                                  # starts and commits a transaction
+    rows = conn.execute(text("SELECT id FROM users WHERE age &gt; :age"), {"age": 30}).all()</code></pre>`],
+["postgres","Mid","What is Azure Database for PostgreSQL Flexible Server?",`<p><b>In simple words:</b> It's Azure's managed PostgreSQL service. Azure runs the server, patches, backups and high availability, and you use it like normal Postgres.</p><ul><li><b>Compute tiers:</b> Burstable (dev/test), General Purpose, Memory Optimized; you can scale up or down.</li><li><b>High availability:</b> optional zone-redundant standby with automatic failover.</li><li><b>Backups:</b> automatic, with point-in-time restore (7–35 days).</li><li><b>Read replicas</b> for scaling reads, and built-in <b>PgBouncer</b>.</li><li><b>Security:</b> private access (VNet integration or private endpoint), firewall rules, TLS, and <b>Microsoft Entra ID authentication</b>, so the app can connect with a managed identity instead of a password.</li><li><b>Extensions:</b> allow them in server parameters (for example pg_stat_statements, pgvector, PostGIS).</li></ul>`],
 ["db","Junior","SQL vs NoSQL: when to use each?",`<p>SQL (PostgreSQL, Azure SQL) for relational data, joins and ACID transactions (orders, users, payments). NoSQL (Cosmos DB, MongoDB, Redis) for flexible schemas, huge scale with simple access patterns, caching, or document data. Many systems use both.</p>`],
 ["db","Junior","What are REST principles and common HTTP status codes?",`<p>Resources as nouns (<code>/users/42</code>), HTTP verbs for actions, stateless requests. Codes: 200 OK, 201 Created, 204 No Content, 400 Bad Request, 401 Unauthenticated, 403 Forbidden, 404 Not Found, 409 Conflict, 422 Validation error, 429 Too Many Requests, 500 Server error.</p>`],
 ["db","Junior","PUT vs PATCH? Which methods are idempotent?",`<p>PUT replaces the whole resource; PATCH changes some fields. GET, PUT, DELETE are idempotent (repeating gives the same result); POST is not, so use idempotency keys for payments.</p>`],
