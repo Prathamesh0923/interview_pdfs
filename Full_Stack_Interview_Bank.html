@@ -130,7 +130,7 @@ pre code{background:none;padding:0;font-size:inherit}
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="eyebrow">Question bank · Python · SQL · PostgreSQL · MongoDB · Redis · React · Next.js · HTML/CSS · Azure · Auth · DSA</div>
+    <div class="eyebrow">Question bank · Python · SQL · PostgreSQL · MongoDB · Redis · Docker · Kubernetes · React · Next.js · HTML/CSS · Azure · Auth · DSA</div>
     <h1>Full Stack Interview Bank</h1>
     <p class="lede">The questions that come up most often in full stack interviews, gathered from published 2026 interview guides and grouped by topic. Each one has a short model answer. Search, filter by level, mark what you know, or run a random practice round.</p>
     <div class="stats"><span><b id="st-total">0</b> questions</span><span><b id="st-known">0</b> marked known</span><span><b id="st-shown">0</b> shown</span></div>
@@ -320,6 +320,8 @@ const CATS = [
   {id:"db", name:"Databases & APIs", sub:"SQL, indexing, transactions, REST vs GraphQL, caching."},
   {id:"auth", name:"Auth Architecture", sub:"Signup, login, email verification, password reset, sessions vs JWT, OAuth, MFA. Frequently asked as a system design round."},
   {id:"azure", name:"Azure", sub:"App Service, Functions, Entra ID, Key Vault, storage, DevOps."},
+  {id:"docker", name:"Docker", sub:"Images, containers, Dockerfiles for FastAPI and Next.js, layers and caching, volumes, networking, compose, debugging, security, Azure Container Registry."},
+  {id:"k8s", name:"Kubernetes", sub:"Pods, Deployments, Services, Ingress, ConfigMaps and Secrets, probes, autoscaling, storage, kubectl debugging, RBAC, Helm, AKS."},
   {id:"design", name:"System Design & DevOps", sub:"Scaling, caching, queues, CI/CD, observability."},
   {id:"security", name:"Web Security", sub:"XSS, CSRF, CORS, SQL injection, headers."},
   {id:"dsa", name:"DSA: Strings, Arrays, Lists", sub:"The data structures and algorithms problems asked most often in full stack rounds, with Python and JavaScript solutions and complexity."},
@@ -1885,6 +1887,509 @@ ph.verify(hash, attempt)  # raises on mismatch</code></pre>`],
 ["azure","Senior","How do you monitor and troubleshoot an Azure app?",`<p>Application Insights (requests, dependencies, exceptions, distributed tracing via OpenTelemetry), Log Analytics with KQL queries, alerts on failure rate and latency, availability tests, App Service diagnostics and log stream.</p>`],
 ["azure","Senior","Azure RBAC vs Entra ID roles?",`<p>Azure RBAC controls access to Azure resources (Contributor on a resource group) with scope inheritance: management group → subscription → resource group → resource. Entra ID roles control directory administration (User Administrator). Grant least privilege at the narrowest scope.</p>`],
 
+// ---------- Docker ----------
+["docker","Junior","What is Docker? How is a container different from a virtual machine?",`<p><b>In simple words:</b> Docker packages your app together with everything it needs (Python, libraries, config) into one box called a container. That box runs the same way on your laptop, in CI and on Azure, which ends "it works on my machine" problems.</p><ul><li><b>Virtual machine:</b> runs a full guest operating system on top of a hypervisor. Heavy (GBs), boots in minutes.</li><li><b>Container:</b> shares the host's Linux kernel and only isolates the process (using namespaces and cgroups). Light (MBs), starts in about a second.</li><li>Trade-off: VMs give stronger isolation; containers give speed and density. In the cloud you often run containers <i>inside</i> VMs.</li></ul>`],
+["docker","Junior","Image vs container vs registry?",`<p><b>In simple words:</b> An <b>image</b> is a read-only recipe snapshot (like a class). A <b>container</b> is a running copy of that image (like an object made from the class). A <b>registry</b> is where images are stored and shared (Docker Hub, Azure Container Registry, GitHub Container Registry).</p><pre><code>docker pull python:3.12-slim        # download an image from a registry
+docker run -it python:3.12-slim     # start a container from that image
+docker ps                           # list running containers
+docker images                       # list images on this machine</code></pre><p>You can start many containers from one image, and each has its own writable layer on top.</p>`],
+["docker","Junior","Explain the main Dockerfile instructions.",`<p><b>In simple words:</b> A Dockerfile is a list of steps Docker follows to build an image. Each step is one instruction.</p><pre><code>FROM python:3.12-slim          # base image to start from
+WORKDIR /app                   # folder inside the image; later commands run here
+COPY requirements.txt .        # copy files from your computer into the image
+RUN pip install -r requirements.txt   # run a command while BUILDING the image
+ENV APP_ENV=production         # environment variable, available at build AND run time
+ARG APP_VERSION=1.0            # variable available ONLY while building
+EXPOSE 8000                    # documents the port the app listens on (does not publish it)
+USER appuser                   # run the following steps / the app as this user
+HEALTHCHECK CMD curl -f http://localhost:8000/health || exit 1   # Docker checks the app is healthy
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0"]   # default command when the container STARTS</code></pre><ul><li><b>COPY vs ADD:</b> COPY just copies files. ADD can also extract tar files and download URLs, which can surprise you. Use COPY unless you need that.</li><li><b>RUN vs CMD:</b> RUN happens at build time; CMD happens at container start.</li></ul>`],
+["docker","Mid","CMD vs ENTRYPOINT? Exec form vs shell form?",`<p><b>In simple words:</b> ENTRYPOINT is the program that always runs. CMD gives default arguments that the user can override with <code>docker run image other-args</code>.</p><pre><code>ENTRYPOINT ["python", "manage.py"]   # always runs manage.py
+CMD ["runserver"]                    # default argument
+
+# docker run myimage            -> python manage.py runserver
+# docker run myimage migrate    -> python manage.py migrate   (CMD replaced)</code></pre><ul><li><b>Exec form</b> <code>["uvicorn", "main:app"]</code>: your app is PID 1 and receives stop signals directly. Prefer this.</li><li><b>Shell form</b> <code>uvicorn main:app</code>: runs through <code>/bin/sh -c</code>, so the shell gets the signal and your app may not shut down cleanly.</li></ul>`],
+["docker","Mid","What are image layers and how does the build cache work?",`<p><b>In simple words:</b> Each instruction in a Dockerfile creates a layer. Docker reuses (caches) a layer if that step and everything before it has not changed. Once one layer changes, every layer after it is rebuilt.</p><pre><code># GOOD order: dependencies change rarely, code changes often
+COPY requirements.txt .                # 1. copy only the dependency list
+RUN pip install -r requirements.txt    # 2. cached until requirements.txt changes
+COPY . .                               # 3. copy the code (changes every commit)
+
+# BAD order: any code change re-installs every package
+COPY . .
+RUN pip install -r requirements.txt</code></pre><p>Same idea for Node: copy <code>package.json</code> and <code>package-lock.json</code>, run <code>npm ci</code>, then copy the rest.</p>`],
+["docker","Mid","Write a production Dockerfile for a FastAPI app.",`<p><b>In simple words:</b> Start from a small Python image, install dependencies first (for caching), copy the code, switch to a non-root user, and start with Gunicorn managing Uvicorn workers.</p><pre><code>FROM python:3.12-slim
+
+# don't write .pyc files, and print logs straight away (no buffering)
+ENV PYTHONDONTWRITEBYTECODE=1 \\
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# install dependencies first so this layer is cached
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt   # --no-cache-dir keeps the image smaller
+
+# copy the application code
+COPY . .
+
+# create a normal user and use it (never run as root)
+RUN useradd --create-home appuser
+USER appuser
+
+EXPOSE 8000
+
+# exec form so Gunicorn is PID 1 and gets stop signals
+CMD ["gunicorn", "main:app", "-k", "uvicorn.workers.UvicornWorker", "-w", "2", "-b", "0.0.0.0:8000"]</code></pre>`],
+["docker","Mid","Write a multi-stage Dockerfile for a Next.js app.",`<p><b>In simple words:</b> Use one stage to install and build, then copy only the finished output into a small final image. With <code>output: 'standalone'</code> in <code>next.config.js</code>, Next.js creates a minimal server folder with only the files it needs.</p><pre><code># ---- stage 1: install dependencies ----
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci                                  # clean install from the lock file
+
+# ---- stage 2: build the app ----
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules   # reuse installed packages
+COPY . .
+RUN npm run build                           # creates .next/standalone
+
+# ---- stage 3: small runtime image ----
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+# copy only what is needed to run
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+USER node                                   # built-in non-root user in node images
+EXPOSE 3000
+CMD ["node", "server.js"]                   # server.js is generated by standalone output</code></pre><p>The final image has no source code, no dev dependencies and no build tools.</p>`],
+["docker","Junior","What is .dockerignore and why does it matter?",`<p><b>In simple words:</b> It lists files Docker should NOT send into the build. This makes builds faster, images smaller, and stops secrets leaking into the image.</p><pre><code># .dockerignore
+.git              # history is not needed in the image
+node_modules      # reinstalled inside the image anyway
+.next
+__pycache__
+*.pyc
+.venv
+.env              # NEVER copy secrets into an image
+Dockerfile
+docker-compose.yml</code></pre>`],
+["docker","Mid","How do you make a Docker image smaller?",`<p><b>In simple words:</b> Start from a small base, keep only what the app needs at runtime, and don't leave caches behind.</p><ul><li><b>Smaller base:</b> <code>python:3.12-slim</code> (Debian, good default). <code>alpine</code> is tiny but uses musl libc, so some Python packages must compile and can break or be slower. <b>Distroless</b> images have no shell or package manager: very small and secure, but harder to debug.</li><li><b>Multi-stage builds:</b> build in one stage, copy only the output.</li><li><b>Combine and clean in the same RUN</b> (a file deleted in a later layer still takes space in the earlier one):</li></ul><pre><code>RUN apt-get update \\
+ &amp;&amp; apt-get install -y --no-install-recommends libpq5 \\
+ &amp;&amp; rm -rf /var/lib/apt/lists/*        # remove the package list cache in the SAME layer
+RUN pip install --no-cache-dir -r requirements.txt</code></pre><ul><li>Use <code>.dockerignore</code>, and check sizes with <code>docker images</code> or <code>docker history myimage</code>.</li></ul>`],
+["docker","Junior","Essential Docker CLI commands.",`<p><b>In simple words:</b> These are the commands you use every day to build, run, inspect and clean up containers.</p><pre><code>docker build -t myapi:1.0 .            # build an image from the Dockerfile in this folder
+docker run -d -p 8000:8000 --name api -e APP_ENV=dev myapi:1.0
+#   -d      run in the background
+#   -p      host port 8000 -> container port 8000
+#   --name  give the container a friendly name
+#   -e      set an environment variable
+docker ps                              # running containers (add -a to see stopped ones)
+docker logs -f api                     # follow the container's logs
+docker exec -it api bash               # open a shell inside the running container (sh on alpine)
+docker stop api                        # stop it gracefully
+docker rm api                          # delete the stopped container
+docker images                          # list images
+docker rmi myapi:1.0                   # delete an image
+docker system prune                    # remove stopped containers, unused networks, dangling images</code></pre>`],
+["docker","Junior","How does port mapping work?",`<p><b>In simple words:</b> A container has its own network. <code>-p HOST:CONTAINER</code> opens a door from your machine's port to the container's port.</p><pre><code>docker run -p 8080:8000 myapi        # browser: http://localhost:8080 -> app on 8000 inside
+docker run -p 127.0.0.1:8080:8000 myapi   # only reachable from this machine
+docker port api                      # show the mappings of a container</code></pre><p>The app inside must listen on <code>0.0.0.0</code>, not <code>127.0.0.1</code>; otherwise it only accepts connections from inside the container. <code>EXPOSE</code> alone does not publish a port.</p>`],
+["docker","Mid","Volumes vs bind mounts vs tmpfs? How do you keep Postgres data?",`<p><b>In simple words:</b> A container's own files disappear when the container is removed. To keep data, store it outside the container.</p><ul><li><b>Named volume:</b> managed by Docker. Best for databases.</li><li><b>Bind mount:</b> a folder from your computer. Best for live code reload in development.</li><li><b>tmpfs:</b> stored in memory only, gone on stop. Good for temporary secrets or scratch files.</li></ul><pre><code># named volume "pgdata" keeps the database files
+docker volume create pgdata
+docker run -d --name db -e POSTGRES_PASSWORD=devpass \\
+  -v pgdata:/var/lib/postgresql/data postgres:17
+
+# bind mount: your ./src folder appears inside the container
+docker run -v "$PWD/src:/app/src" myapi
+
+docker volume ls              # list volumes
+docker rm -f db               # container gone, but pgdata still has the data</code></pre>`],
+["docker","Mid","Explain Docker networking: bridge, host, none, user-defined networks.",`<p><b>In simple words:</b> Networks decide which containers can talk to each other and how they find each other.</p><ul><li><b>bridge</b> (default): private network on the host; reach containers from outside with <code>-p</code>.</li><li><b>User-defined bridge:</b> same, but containers can find each other <b>by name</b> through Docker's built-in DNS. Always use this for multi-container apps.</li><li><b>host:</b> container uses the host's network directly (no port mapping, Linux only).</li><li><b>none:</b> no network at all.</li></ul><pre><code>docker network create appnet                    # create a user-defined network
+docker run -d --name db --network appnet postgres:17
+docker run -d --name api --network appnet myapi
+# inside "api", the database address is simply:  db:5432</code></pre><p>Common mistake: using <code>localhost</code> to reach another container. Inside a container, localhost means that container itself.</p>`],
+["docker","Mid","Write a docker compose file for Next.js + FastAPI + Postgres + Redis.",`<p><b>In simple words:</b> Docker Compose starts several containers together from one YAML file, on one shared network, where each service is reachable by its name.</p><pre><code># compose.yaml
+services:
+  web:                                   # Next.js front end
+    build: ./web
+    ports: ["3000:3000"]
+    environment:
+      API_URL: http://api:8000           # "api" is the service name below
+    depends_on: [api]
+
+  api:                                   # FastAPI back end
+    build: ./api
+    ports: ["8000:8000"]
+    env_file: .env                       # load variables from a file (not committed)
+    depends_on:
+      db:
+        condition: service_healthy       # wait until Postgres is really ready
+      redis:
+        condition: service_started
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: devpass         # fine for local dev only
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # keep data between restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+
+volumes:
+  pgdata:</code></pre><pre><code>docker compose up -d --build     # build and start everything
+docker compose logs -f api       # follow one service's logs
+docker compose down              # stop and remove (add -v to delete volumes too)</code></pre>`],
+["docker","Mid","How do you handle environment variables and secrets with Docker?",`<p><b>In simple words:</b> Pass settings in when the container starts. Never put secrets in the Dockerfile or copy a <code>.env</code> into the image, because anyone who pulls the image can read every layer.</p><ul><li>Local: <code>docker run --env-file .env</code> or <code>env_file</code> in compose (keep <code>.env</code> in .gitignore and .dockerignore).</li><li>Build-time secrets (e.g. a private package token): use BuildKit secrets, which are not saved in layers.</li><li>Azure: store secrets in Key Vault and read them at runtime with a managed identity, or use Key Vault references in App Service / Container Apps settings.</li></ul><pre><code># build secret: available only during this RUN step, not in the final image
+RUN --mount=type=secret,id=pip_token \\
+    PIP_INDEX_URL="https://user:$(cat /run/secrets/pip_token)@pkgs.example.com/simple" \\
+    pip install -r requirements.txt
+
+# docker build --secret id=pip_token,src=./token.txt -t myapi .</code></pre><p>Also avoid <code>ARG</code> for secrets: build args show up in <code>docker history</code>.</p>`],
+["docker","Junior","What are restart policies?",`<p><b>In simple words:</b> They tell Docker what to do when a container stops or crashes.</p><pre><code>docker run --restart no myapi              # default: never restart
+docker run --restart on-failure:3 myapi    # restart on crash (non-zero exit), max 3 times
+docker run --restart unless-stopped myapi  # always restart, unless you stopped it yourself
+docker run --restart always myapi          # always restart, even after a daemon reboot</code></pre><p>In Kubernetes or Container Apps, the platform handles restarts instead.</p>`],
+["docker","Mid","A container keeps crashing. How do you debug it? What do exit codes 0, 1, 137 and 139 mean?",`<p><b>In simple words:</b> Look at the logs, the exit code and the container's details. The exit code usually tells you what kind of failure it was.</p><pre><code>docker ps -a                           # see the STATUS, e.g. "Exited (137)"
+docker logs api                        # read what the app printed before dying
+docker inspect api --format '{{.State.ExitCode}} {{.State.OOMKilled}}'
+docker run -it --entrypoint sh myapi   # start a shell instead of the app to look around
+docker stats                           # live CPU and memory use</code></pre><ul><li><b>0</b>: the process finished normally (common mistake: the main command ends, so the container stops).</li><li><b>1</b>: the app crashed with an error (read the logs).</li><li><b>137</b>: killed with SIGKILL (128 + 9). Usually out of memory (OOMKilled = true) or a forced stop.</li><li><b>139</b>: segmentation fault (128 + 11), often a native library problem.</li><li><b>143</b>: stopped by SIGTERM (128 + 15), a normal <code>docker stop</code>.</li></ul>`],
+["docker","Senior","What is the PID 1 problem? How do you get graceful shutdown?",`<p><b>In simple words:</b> The first process in a container is PID 1. Linux treats PID 1 specially: it ignores signals like SIGTERM unless the program handles them, and it must clean up finished child processes (zombies). If your app is not PID 1 or ignores SIGTERM, <code>docker stop</code> waits 10 seconds and then kills it hard, dropping in-flight requests.</p><ul><li>Use the <b>exec form</b> CMD so your app is PID 1 (no shell in between).</li><li>Add a tiny init process with <code>docker run --init</code> or install <code>tini</code>; it forwards signals and reaps zombies.</li><li>Handle SIGTERM in the app: stop accepting new requests, finish current ones, close DB connections. Gunicorn and Uvicorn already do this.</li></ul><pre><code>RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends tini &amp;&amp; rm -rf /var/lib/apt/lists/*
+ENTRYPOINT ["/usr/bin/tini", "--"]      # tini is PID 1 and forwards signals
+CMD ["gunicorn", "main:app", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000"]</code></pre>`],
+["docker","Senior","Docker security best practices?",`<p><b>In simple words:</b> Give the container as little power as possible and only ship what you trust.</p><ul><li>Run as a <b>non-root user</b> (<code>USER appuser</code>).</li><li>Use <b>minimal base images</b> (slim or distroless); fewer packages means fewer vulnerabilities.</li><li><b>Pin versions</b> (<code>python:3.12.7-slim</code>) or even digests (<code>@sha256:...</code>) so builds are repeatable.</li><li><b>Scan images</b> in CI with Trivy or Docker Scout, and fail the build on critical CVEs.</li><li>No secrets in images; use runtime secrets or Key Vault.</li><li>Run with a <b>read-only filesystem</b> and drop Linux capabilities when possible.</li><li>Never mount the Docker socket into an app container; that is equal to root on the host.</li></ul><pre><code>docker run --read-only --tmpfs /tmp \\
+  --cap-drop ALL --security-opt no-new-privileges myapi
+trivy image myapi:1.0          # list known vulnerabilities in the image</code></pre>`],
+["docker","Mid","How should you tag images? Why not use :latest?",`<p><b>In simple words:</b> <code>:latest</code> is just a default name, not "the newest". It changes silently, so you can't tell which code is running or roll back reliably. Tag each build with something unique.</p><pre><code>GIT_SHA=$(git rev-parse --short HEAD)             # e.g. 3f2a9c1
+docker build -t myacr.azurecr.io/api:$GIT_SHA .    # unique, traceable to a commit
+docker tag myacr.azurecr.io/api:$GIT_SHA myacr.azurecr.io/api:1.4.0   # optional release tag</code></pre><p>Deploy the SHA or version tag. To roll back, redeploy the previous tag.</p>`],
+["docker","Mid","How do you push an image to Azure Container Registry and run it on Azure?",`<p><b>In simple words:</b> Log in to your registry, tag the image with the registry's address, push it, then point App Service or Container Apps at it.</p><pre><code>az login                                          # sign in to Azure
+az acr login --name myacr                         # let Docker push to myacr.azurecr.io
+docker tag myapi:1.0 myacr.azurecr.io/api:1.0     # name the image with the registry address
+docker push myacr.azurecr.io/api:1.0              # upload it
+
+# Option A: build directly in Azure (no local Docker needed)
+az acr build --registry myacr --image api:1.0 .
+
+# Deploy to Azure Container Apps
+az containerapp create --name api --resource-group rg-app \\
+  --environment app-env --image myacr.azurecr.io/api:1.0 \\
+  --target-port 8000 --ingress external \\
+  --registry-server myacr.azurecr.io --registry-identity system</code></pre><p>Let the app pull from ACR with a <b>managed identity</b> (AcrPull role) instead of admin passwords.</p>`],
+["docker","Senior","How do you build and push Docker images in CI (GitHub Actions)?",`<p><b>In simple words:</b> On every push to main, CI logs in to Azure, builds the image with caching, tags it with the commit SHA, and pushes it to ACR.</p><pre><code># .github/workflows/docker.yml
+name: build-and-push
+on:
+  push:
+    branches: [main]
+permissions:
+  id-token: write          # allow passwordless (OIDC) login to Azure
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: &#36;{{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: &#36;{{ secrets.AZURE_TENANT_ID }}
+          subscription-id: &#36;{{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - run: az acr login --name myacr
+      - uses: docker/setup-buildx-action@v3      # enables BuildKit and caching
+      - name: Build and push
+        run: |
+          docker buildx build \\
+            --cache-from type=gha --cache-to type=gha,mode=max \\
+            -t myacr.azurecr.io/api:$GITHUB_SHA \\
+            --push .</code></pre><p>After pushing: scan the image, deploy to a staging environment, run smoke tests, then promote the same tag to production.</p>`],
+["docker","Junior","What happens when you run <code>docker run -p 8000:8000 myapi</code>?",`<p><b>In simple words:</b> Docker finds the image, creates a container with its own filesystem and network, connects the port, and starts your command.</p><ol><li>The CLI sends the request to the Docker daemon (<code>dockerd</code>).</li><li>If <code>myapi</code> is not on the machine, it is pulled from the registry.</li><li>A thin writable layer is added on top of the read-only image layers.</li><li>Linux namespaces isolate processes, network and files; cgroups limit CPU and memory.</li><li>The container is attached to the bridge network and port 8000 on the host is forwarded to port 8000 inside.</li><li>The ENTRYPOINT/CMD starts as PID 1. When that process exits, the container stops.</li></ol>`],
+["docker","Mid","Docker vs Podman? Docker Compose vs Kubernetes?",`<p><b>In simple words:</b> Podman runs the same OCI images as Docker but has no always-running daemon and runs rootless by default; most commands are identical (<code>podman run ...</code>). Docker Compose runs several containers on <b>one machine</b>, great for local development. Kubernetes runs containers across <b>many machines</b> with self-healing, scaling and rolling updates, for production at scale.</p><ul><li>Small production apps on Azure often skip Kubernetes and use <b>Azure Container Apps</b> or App Service for containers.</li></ul>`],
+// ---------- Kubernetes ----------
+["k8s","Junior","What is Kubernetes and why use it instead of plain Docker or docker compose?",`<p><b>In simple words:</b> Docker runs containers on one machine. Kubernetes (K8s) runs containers across many machines and keeps them healthy for you: it restarts crashed containers, spreads them over servers, scales them up and down, and rolls out new versions without downtime.</p><ul><li><b>docker compose</b>: great for local development and a single server. If the server dies, everything dies.</li><li><b>Kubernetes</b>: you describe the <i>desired state</i> ("3 copies of my API, version 1.4") in YAML and K8s keeps making reality match it.</li><li>You get self-healing, load balancing, rolling updates, autoscaling, config and secret management, and a standard API every cloud supports (AKS on Azure, EKS on AWS, GKE on Google).</li><li>Downside: it is complex. For a small app, Azure Container Apps or App Service is often enough.</li></ul>`],
+["k8s","Mid","Explain the Kubernetes cluster architecture.",`<p><b>In simple words:</b> A cluster has a "brain" (the control plane) that decides what should run where, and "workers" (nodes) that actually run your containers.</p><ul><li><b>Control plane</b><ul><li><b>API server</b>: the front door. kubectl, the dashboard and every other component talk only to it.</li><li><b>etcd</b>: a key-value database storing the whole cluster state (all your YAML). Back it up.</li><li><b>Scheduler</b>: picks which node a new pod should run on, based on free CPU/memory and rules.</li><li><b>Controller manager</b>: runs loops that compare desired vs actual state and fix differences (e.g. "3 replicas wanted, only 2 running, start one more").</li></ul></li><li><b>Each worker node</b><ul><li><b>kubelet</b>: agent that starts/stops containers on that node and reports health.</li><li><b>kube-proxy</b>: sets up networking rules so Services can reach pods.</li><li><b>Container runtime</b>: actually runs containers (containerd, CRI-O).</li></ul></li></ul><p>In AKS, Azure manages the control plane for you; you only manage the nodes.</p>`],
+["k8s","Junior","Pod vs ReplicaSet vs Deployment: how are they related?",`<p><b>In simple words:</b> A <b>Pod</b> is the smallest unit: one or more containers that share network and storage. A <b>ReplicaSet</b> keeps N identical pods running. A <b>Deployment</b> manages ReplicaSets so you can roll out new versions and roll back.</p><pre><code># Deployment  (you write this)
+#   └── ReplicaSet  (created by the Deployment, one per version)
+#         └── Pod, Pod, Pod  (created by the ReplicaSet)
+
+kubectl get deploy,rs,pods -l app=api   # see all three levels for one app</code></pre><ul><li>You almost never create Pods or ReplicaSets directly. You create a Deployment.</li><li>When you change the image, the Deployment creates a new ReplicaSet and slowly moves pods from the old one to the new one (rolling update).</li><li>Pods are temporary: they get new names and IPs when replaced, so never hard-code a pod IP.</li></ul>`],
+["k8s","Mid","Write a Deployment YAML for a FastAPI app with config, secrets, resources and probes.",`<p><b>In simple words:</b> This file tells Kubernetes: run 3 copies of my FastAPI image, give each some CPU/memory, load settings from a ConfigMap and passwords from a Secret, and check health before sending traffic.</p><pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api                          # name of the deployment
+  labels:
+    app: api                         # label so we can find it later
+spec:
+  replicas: 3                        # run 3 copies (pods)
+  selector:
+    matchLabels:
+      app: api                       # manage pods that have this label
+  template:                          # the pod blueprint
+    metadata:
+      labels:
+        app: api                     # must match the selector above
+    spec:
+      containers:
+        - name: api
+          image: myacr.azurecr.io/api:1.4.0   # always pin a version, not :latest
+          ports:
+            - containerPort: 8000              # uvicorn listens here
+          envFrom:
+            - configMapRef:
+                name: api-config               # non-secret settings (LOG_LEVEL, API_URL)
+          env:
+            - name: DATABASE_URL               # one secret value as an env var
+              valueFrom:
+                secretKeyRef:
+                  name: api-secrets
+                  key: database-url
+          resources:
+            requests:                          # guaranteed minimum, used for scheduling
+              cpu: "250m"                      # a quarter of one CPU core
+              memory: "256Mi"
+            limits:                            # hard maximum
+              memory: "512Mi"                  # above this the container is killed (OOMKilled)
+          startupProbe:                        # give slow startup time before other probes run
+            httpGet: { path: /healthz, port: 8000 }
+            failureThreshold: 30               # 30 tries x 2s = up to 60s to start
+            periodSeconds: 2
+          readinessProbe:                      # "can I receive traffic?"
+            httpGet: { path: /ready, port: 8000 }
+            periodSeconds: 5
+          livenessProbe:                       # "am I stuck? restart me if not"
+            httpGet: { path: /healthz, port: 8000 }
+            periodSeconds: 10
+            failureThreshold: 3</code></pre><p class="tip"><b>Tip:</b> many teams set a memory limit but no CPU limit, to avoid CPU throttling. Say why if asked.</p>`],
+["k8s","Junior","What is a Service? Explain ClusterIP, NodePort, LoadBalancer and headless.",`<p><b>In simple words:</b> Pods come and go and change IPs. A <b>Service</b> gives a group of pods one stable name and IP, and load-balances traffic across them using labels.</p><pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: api                    # other pods can call http://api:80
+spec:
+  type: ClusterIP              # default: reachable only inside the cluster
+  selector:
+    app: api                   # send traffic to pods with label app=api
+  ports:
+    - port: 80                 # port the Service listens on
+      targetPort: 8000         # port the container listens on</code></pre><ul><li><b>ClusterIP</b>: internal only. Use for APIs and databases called by other pods.</li><li><b>NodePort</b>: opens the same port (30000–32767) on every node. Mostly for testing.</li><li><b>LoadBalancer</b>: asks the cloud (Azure) for a public or private load balancer IP. One per service can get expensive.</li><li><b>Headless</b> (<code>clusterIP: None</code>): no single IP; DNS returns each pod's IP. Used with StatefulSets (e.g. database replicas).</li></ul><p>Inside the cluster, the full DNS name is <code>api.&lt;namespace&gt;.svc.cluster.local</code>.</p>`],
+["k8s","Mid","What is an Ingress? Route / to Next.js and /api to FastAPI with HTTPS.",`<p><b>In simple words:</b> An <b>Ingress</b> is a set of HTTP routing rules (by domain and path). An <b>ingress controller</b> (NGINX, Traefik, or on Azure the Application Gateway for Containers) is the actual web proxy that reads those rules. One public IP can serve many apps.</p><pre><code>apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt   # cert-manager gets a free TLS certificate
+spec:
+  ingressClassName: nginx            # which controller handles this Ingress
+  tls:
+    - hosts: [app.example.com]
+      secretName: app-tls            # cert-manager stores the certificate here
+  rules:
+    - host: app.example.com
+      http:
+        paths:
+          - path: /api               # requests to /api/... go to FastAPI
+            pathType: Prefix
+            backend:
+              service:
+                name: api
+                port: { number: 80 }
+          - path: /                  # everything else goes to Next.js
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port: { number: 80 }</code></pre><p class="tip"><b>Note:</b> the newer <b>Gateway API</b> (Gateway + HTTPRoute) is the long-term replacement for Ingress; worth mentioning.</p>`],
+["k8s","Mid","ConfigMap vs Secret. Are Kubernetes Secrets actually secure?",`<p><b>In simple words:</b> Both hold configuration that pods read as env vars or files. ConfigMaps are for normal settings; Secrets are for passwords and keys. But a Secret is only <b>base64-encoded</b>, not encrypted, so anyone who can read it can decode it.</p><pre><code># create a ConfigMap and a Secret from the command line
+kubectl create configmap api-config --from-literal=LOG_LEVEL=info
+kubectl create secret generic api-secrets --from-literal=database-url='postgresql://...'
+
+# base64 is NOT encryption:
+kubectl get secret api-secrets -o jsonpath='{.data.database-url}' | base64 -d
+# prints the real password</code></pre><p>How to protect secrets properly:</p><ul><li>Limit who can read Secrets with RBAC.</li><li>Turn on encryption at rest for etcd (AKS does this by default; you can add your own key).</li><li>Keep the real secret in <b>Azure Key Vault</b> and load it with the <b>Secrets Store CSI driver</b> or <b>External Secrets Operator</b>, using Workload Identity (no passwords in YAML).</li><li>Never commit Secret YAML to git. If you must, use Sealed Secrets or SOPS.</li></ul>`],
+["k8s","Junior","What are namespaces, labels and selectors?",`<p><b>In simple words:</b> <b>Namespaces</b> are folders that split one cluster into separate areas (dev, staging, team-a). <b>Labels</b> are key=value tags on objects. <b>Selectors</b> find objects by their labels; this is how Services and Deployments know which pods are theirs.</p><pre><code>kubectl create namespace staging              # make a new "folder"
+kubectl get pods -n staging                   # list pods only in staging
+kubectl get pods -A                           # list pods in all namespaces
+
+kubectl get pods -l app=api,tier=backend      # select pods by labels
+kubectl label pod api-7d9f env=prod           # add a label to a pod</code></pre><ul><li>Names must be unique only inside a namespace.</li><li>You can set resource quotas and RBAC per namespace.</li><li>Namespaces are not a strong security boundary on their own; add NetworkPolicies and RBAC.</li></ul>`],
+["k8s","Mid","How do rolling updates work? Explain maxSurge, maxUnavailable and rollback.",`<p><b>In simple words:</b> When you change the image, Kubernetes replaces old pods with new ones a few at a time, waiting for each new pod to be ready. If something goes wrong you can roll back to the previous version with one command.</p><pre><code>spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1            # at most 1 extra pod above the replica count during the update
+      maxUnavailable: 0      # never drop below the replica count (safest, zero downtime)</code></pre><pre><code>kubectl set image deploy/api api=myacr.azurecr.io/api:1.5.0   # start the update
+kubectl rollout status deploy/api          # watch until it finishes (or fails)
+kubectl rollout history deploy/api         # list previous versions
+kubectl rollout undo deploy/api            # go back to the previous version
+kubectl rollout undo deploy/api --to-revision=3   # go back to a specific version</code></pre><p>The readiness probe is what makes this safe: a new pod only gets traffic once it reports ready. The other strategy, <code>Recreate</code>, kills all old pods first (causes downtime).</p>`],
+["k8s","Mid","Liveness vs readiness vs startup probes.",`<p><b>In simple words:</b> They are health checks with different consequences.</p><ul><li><b>Readiness</b>: "Can I take traffic right now?" If it fails, the pod is removed from the Service but <b>not</b> restarted. Use it while warming up or when a dependency is down.</li><li><b>Liveness</b>: "Am I stuck?" If it fails several times, the container is <b>restarted</b>. Use it for deadlocks.</li><li><b>Startup</b>: "Have I finished starting?" Liveness and readiness wait until it passes. Use it for slow-starting apps so liveness doesn't kill them early.</li></ul><pre><code># FastAPI endpoints for probes
+@app.get("/healthz")          # liveness: only checks the process is responsive
+def healthz():
+    return {"ok": True}
+
+@app.get("/ready")            # readiness: can we reach what we need?
+async def ready():
+    await db.execute("SELECT 1")   # fails if DB is unreachable
+    return {"ready": True}</code></pre><p class="tip"><b>Common mistake:</b> checking the database in the <i>liveness</i> probe. If the DB goes down, every pod restarts in a loop and makes things worse.</p>`],
+["k8s","Mid","Requests vs limits, QoS classes, OOMKilled and CPU throttling.",`<p><b>In simple words:</b> <b>Requests</b> are what a container is guaranteed; the scheduler uses them to pick a node. <b>Limits</b> are the maximum it may use.</p><ul><li><b>Memory over limit</b>: the container is killed (<code>OOMKilled</code>, exit code 137) and restarted.</li><li><b>CPU over limit</b>: the container is <b>throttled</b> (slowed down), not killed. This shows up as slow responses.</li><li>CPU units: <code>1</code> = one core, <code>500m</code> = half a core. Memory: <code>Mi</code>, <code>Gi</code>.</li></ul><p><b>QoS classes</b> (who gets evicted first when a node runs out of memory):</p><ul><li><b>Guaranteed</b>: requests = limits for CPU and memory. Evicted last.</li><li><b>Burstable</b>: requests set, lower than limits. Middle.</li><li><b>BestEffort</b>: nothing set. Evicted first.</li></ul><pre><code>kubectl describe pod api-7d9f | grep -A3 "Last State"   # shows Reason: OOMKilled
+kubectl top pod                                          # real CPU/memory use (needs metrics-server)</code></pre>`],
+["k8s","Mid","How does the Horizontal Pod Autoscaler work? What is KEDA?",`<p><b>In simple words:</b> The <b>HPA</b> watches a metric (usually CPU) and adds or removes pods to keep it near a target. <b>KEDA</b> extends this to scale on events like queue length, and can scale all the way to zero.</p><pre><code>apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api
+spec:
+  scaleTargetRef:                 # what to scale
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api
+  minReplicas: 2                  # never fewer than 2 (for availability)
+  maxReplicas: 10                 # never more than 10 (for cost)
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70  # aim for 70% of the CPU *request* on average</code></pre><ul><li>HPA needs <b>metrics-server</b> and CPU <b>requests</b> set, otherwise it can't calculate utilization.</li><li>HPA adds pods; the <b>cluster autoscaler</b> adds nodes when pods can't fit.</li><li>KEDA example: scale email-worker pods by the number of messages in an Azure Service Bus queue.</li></ul>`],
+["k8s","Senior","StatefulSet vs Deployment. PV, PVC and StorageClass. Should you run Postgres in Kubernetes?",`<p><b>In simple words:</b> A <b>Deployment</b> is for stateless apps where every pod is the same. A <b>StatefulSet</b> gives each pod a fixed name (db-0, db-1), a stable network identity and its own disk that follows it, which databases need.</p><ul><li><b>PersistentVolume (PV)</b>: an actual piece of storage (e.g. an Azure Disk).</li><li><b>PersistentVolumeClaim (PVC)</b>: a pod's request: "I need 20Gi of fast disk".</li><li><b>StorageClass</b>: the recipe for creating PVs automatically (e.g. <code>managed-csi-premium</code> on AKS).</li></ul><pre><code>volumeClaimTemplates:          # inside a StatefulSet: one PVC per pod
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]      # one node can mount it at a time
+      storageClassName: managed-csi-premium
+      resources:
+        requests:
+          storage: 20Gi</code></pre><p><b>Postgres in K8s?</b> Possible (operators like CloudNativePG), but for most teams <b>Azure Database for PostgreSQL</b> is better: backups, failover, patching and point-in-time restore are handled for you. Keep K8s for the stateless API and web tiers.</p>`],
+["k8s","Mid","What are DaemonSets, Jobs and CronJobs? Give real examples.",`<p><b>In simple words:</b> A <b>DaemonSet</b> runs one pod on every node (log collectors, monitoring agents). A <b>Job</b> runs a task until it finishes (a DB migration). A <b>CronJob</b> runs a Job on a schedule (a nightly report).</p><pre><code>apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nightly-report
+spec:
+  schedule: "30 1 * * *"          # every day at 01:30 (cluster time zone, usually UTC)
+  timeZone: "Asia/Kolkata"        # or set a time zone explicitly
+  concurrencyPolicy: Forbid       # don't start a new run if the last one is still running
+  jobTemplate:
+    spec:
+      backoffLimit: 2             # retry at most 2 times on failure
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: report
+              image: myacr.azurecr.io/api:1.4.0
+              command: ["python", "-m", "app.jobs.nightly_report"]</code></pre><p>DB migrations: run <code>alembic upgrade head</code> as a <b>Job</b> (or a Helm pre-upgrade hook) before the new Deployment rolls out, not inside every pod's startup.</p>`],
+["k8s","Junior","Essential kubectl commands.",`<p><b>In simple words:</b> These cover 90% of daily work.</p><pre><code>kubectl get pods                          # list pods in the current namespace
+kubectl get pods -o wide                  # also show node and pod IP
+kubectl get all -n staging                # most object types in one namespace
+kubectl describe pod api-7d9f             # details + recent events (first stop when debugging)
+kubectl logs -f api-7d9f                  # stream logs
+kubectl logs api-7d9f --previous          # logs from the crashed container before restart
+kubectl exec -it api-7d9f -- sh           # open a shell inside the container
+kubectl apply -f k8s/                     # create or update everything in a folder
+kubectl delete -f k8s/deployment.yaml     # delete what the file describes
+kubectl port-forward svc/api 8000:80      # reach a service at localhost:8000 from your laptop
+kubectl top pods                          # CPU and memory usage per pod
+kubectl get events --sort-by=.lastTimestamp   # recent cluster events, newest last
+kubectl config use-context my-aks         # switch between clusters
+kubectl explain deployment.spec.strategy  # built-in docs for any YAML field</code></pre>`],
+["k8s","Mid","How do you debug CrashLoopBackOff, ImagePullBackOff and Pending pods?",`<p><b>In simple words:</b> Always start with <code>kubectl describe pod</code> (look at Events at the bottom), then logs.</p><p><b>CrashLoopBackOff</b>: the container starts then exits, again and again.</p><pre><code>kubectl logs api-7d9f --previous      # why did the last run die?
+# common causes: missing env var or secret, wrong command, app can't reach DB,
+# liveness probe too strict, OOMKilled (check "Last State" in describe)</code></pre><p><b>ImagePullBackOff / ErrImagePull</b>: the node can't download the image.</p><pre><code>kubectl describe pod api-7d9f | tail -20
+# causes: typo in image name or tag, tag doesn't exist,
+# private registry without pull permission (attach ACR to AKS or add imagePullSecrets)</code></pre><p><b>Pending</b>: the scheduler can't place the pod.</p><pre><code>kubectl describe pod api-7d9f          # look for "0/3 nodes are available: insufficient memory"
+# causes: requests too large, no nodes with free space (cluster autoscaler off),
+# nodeSelector/taints don't match, PVC not bound</code></pre>`],
+["k8s","Senior","Explain Kubernetes RBAC: Role, ClusterRole, RoleBinding, ServiceAccount.",`<p><b>In simple words:</b> RBAC answers "who can do what, where". A <b>Role</b> lists allowed actions in one namespace; a <b>ClusterRole</b> is cluster-wide. A <b>RoleBinding</b> gives a Role to a user, group or <b>ServiceAccount</b> (the identity a pod runs as).</p><pre><code>apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: staging
+rules:
+  - apiGroups: [""]                     # "" means the core API group (pods, services...)
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]     # read-only
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-pods
+  namespace: staging
+subjects:
+  - kind: ServiceAccount
+    name: ci-bot                        # the identity getting the permission
+    namespace: staging
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io</code></pre><pre><code>kubectl auth can-i delete pods -n staging --as=system:serviceaccount:staging:ci-bot   # no</code></pre><p>On AKS, connect RBAC to Microsoft Entra ID groups so people log in with their company account.</p>`],
+["k8s","Senior","What is a NetworkPolicy?",`<p><b>In simple words:</b> By default every pod can talk to every other pod. A NetworkPolicy is a firewall rule for pods: "only the web pods may call the api pods on port 8000".</p><pre><code>apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-allow-web
+spec:
+  podSelector:
+    matchLabels:
+      app: api                 # this policy protects the api pods
+  policyTypes: ["Ingress"]     # we are controlling incoming traffic
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: web         # only pods labelled app=web may connect
+      ports:
+        - port: 8000</code></pre><p>It only works if the cluster's network plugin enforces it (Azure CNI with Cilium or Calico on AKS). A common start is a "deny all" default policy per namespace, then allow what's needed.</p>`],
+["k8s","Mid","What is Helm? Explain charts, values and install/upgrade/rollback.",`<p><b>In simple words:</b> Helm is a package manager for Kubernetes. A <b>chart</b> is a folder of YAML templates; <b>values.yaml</b> fills in the blanks (image tag, replicas, domain) so the same chart works for dev, staging and prod.</p><pre><code>mychart/
+  Chart.yaml            # name and version of the chart
+  values.yaml           # default settings
+  templates/
+    deployment.yaml     # YAML with placeholders like {{ .Values.image.tag }}
+    service.yaml</code></pre><pre><code>helm install api ./mychart -n prod -f values-prod.yaml    # first install
+helm upgrade api ./mychart -n prod --set image.tag=1.5.0  # new version
+helm history api -n prod                                   # list releases
+helm rollback api 3 -n prod                                # go back to release 3
+helm template ./mychart -f values-prod.yaml                # see the final YAML without installing</code></pre><p>Alternative without templates: <b>Kustomize</b> (built into kubectl with <code>kubectl apply -k</code>), which patches a base YAML per environment.</p>`],
+["k8s","Senior","How do you achieve zero-downtime deploys and graceful shutdown?",`<p><b>In simple words:</b> New pods must be ready before they get traffic, and old pods must finish their in-flight requests before they die.</p><ol><li>Rolling update with <code>maxUnavailable: 0</code> and a real <b>readiness probe</b>.</li><li>When a pod is stopped, Kubernetes sends <b>SIGTERM</b>, waits <code>terminationGracePeriodSeconds</code> (default 30), then sends SIGKILL.</li><li>Removing the pod from the Service takes a moment, so add a short <b>preStop</b> sleep to avoid dropping requests.</li><li>Your app must handle SIGTERM: stop accepting new work and finish current requests (uvicorn and Node servers do this if not wrapped by a shell script).</li><li>Add a <b>PodDisruptionBudget</b> so node upgrades never take down too many pods at once.</li></ol><pre><code>spec:
+  terminationGracePeriodSeconds: 40     # total time allowed to shut down
+  containers:
+    - name: api
+      lifecycle:
+        preStop:
+          exec:
+            command: ["sleep", "10"]    # wait for load balancers to stop sending traffic
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: api-pdb
+spec:
+  minAvailable: 2                       # keep at least 2 api pods during voluntary disruptions
+  selector:
+    matchLabels:
+      app: api</code></pre><p class="tip"><b>Gotcha:</b> use <code>CMD ["uvicorn", ...]</code> (exec form) in the Dockerfile. With a shell form, the shell gets SIGTERM and your app never does.</p>`],
+["k8s","Senior","Blue-green vs canary deployments in Kubernetes.",`<p><b>In simple words:</b></p><ul><li><b>Blue-green</b>: run the full new version (green) next to the old one (blue), test it, then switch all traffic at once by changing the Service selector. Instant rollback: switch back. Costs double resources during the switch.</li><li><b>Canary</b>: send a small share of traffic (e.g. 5%) to the new version, watch error rates and latency, then increase step by step. Safer for risky changes.</li></ul><pre><code># blue-green: flip the Service to the new version
+kubectl patch service api -p '{"spec":{"selector":{"app":"api","version":"green"}}}'</code></pre><p>Canary percentages need a smarter router: NGINX ingress canary annotations, Gateway API weighted routes, a service mesh (Istio, Linkerd), or tools like <b>Argo Rollouts</b> / <b>Flagger</b> that automate the steps and roll back on bad metrics.</p>`],
+["k8s","Senior","AKS specifics: creating a cluster, ACR, Workload Identity, node pools, autoscaling. When would you pick Azure Container Apps instead?",`<p><b>In simple words:</b> AKS is Azure's managed Kubernetes. Azure runs the control plane; you choose the node VMs.</p><pre><code># create a cluster that can pull from your container registry and scale nodes
+az aks create -g rg-app -n aks-app \\
+  --node-count 3 \\
+  --enable-cluster-autoscaler --min-count 2 --max-count 6 \\
+  --attach-acr myacr \\
+  --enable-oidc-issuer --enable-workload-identity \\
+  --generate-ssh-keys
+
+az aks get-credentials -g rg-app -n aks-app     # adds the cluster to your kubectl config
+az aks nodepool add -g rg-app --cluster-name aks-app -n gpu --node-vm-size Standard_NC6s_v3   # extra pool for special workloads</code></pre><ul><li><b>--attach-acr</b>: lets nodes pull images from Azure Container Registry without passwords.</li><li><b>Workload Identity</b>: a pod's ServiceAccount is linked to a managed identity in Entra ID, so code uses <code>DefaultAzureCredential</code> to reach Key Vault, Storage or SQL with no secrets.</li><li><b>Node pools</b>: a system pool for cluster add-ons plus user pools with different VM sizes.</li><li><b>Cluster autoscaler</b>: adds nodes when pods are Pending, removes idle ones.</li></ul><p><b>Choose Azure Container Apps</b> when you just want to run a few containers (a Next.js site, a FastAPI API, some workers) with autoscaling and scale-to-zero, without managing a cluster. It runs on Kubernetes + KEDA under the hood. Choose <b>AKS</b> when you need full Kubernetes control: many services, custom networking, operators, service mesh, or a platform team.</p>`],
+["k8s","Senior","What is GitOps (Argo CD / Flux)?",`<p><b>In simple words:</b> The git repo is the single source of truth for what runs in the cluster. Instead of CI running <code>kubectl apply</code>, an agent inside the cluster (Argo CD or Flux) watches the repo and syncs the cluster to match it.</p><ul><li>Deploy = merge a pull request that changes the image tag in YAML/Helm values.</li><li>Rollback = <code>git revert</code>.</li><li>Drift detection: if someone edits the cluster by hand, the agent shows or undoes it.</li><li>CI no longer needs cluster admin credentials, which improves security.</li></ul><p>AKS has a built-in Flux (GitOps) extension; Argo CD is popular for its UI.</p>`],
+["k8s","Mid","How do you monitor and log applications running in Kubernetes?",`<p><b>In simple words:</b> Collect three things: <b>metrics</b> (numbers over time), <b>logs</b> (what happened) and <b>traces</b> (a request's path across services).</p><ul><li><b>Metrics</b>: Prometheus scrapes <code>/metrics</code> from your pods; Grafana draws dashboards; Alertmanager sends alerts. On Azure: Azure Monitor managed Prometheus + Azure Managed Grafana.</li><li><b>Logs</b>: apps log JSON to stdout; a DaemonSet agent ships them. On AKS, <b>Container Insights</b> sends them to Log Analytics, queried with KQL.</li><li><b>Traces</b>: OpenTelemetry SDK in FastAPI and Next.js, exported to Application Insights or Jaeger.</li><li>Watch the basics: pod restarts, OOMKilled, CPU throttling, HPA replica count, p95 latency and error rate per service.</li></ul><pre><code># FastAPI: expose Prometheus metrics
+from prometheus_fastapi_instrumentator import Instrumentator
+Instrumentator().instrument(app).expose(app)   # adds a /metrics endpoint</code></pre>`],
+["k8s","Mid","Walk through deploying a Next.js + FastAPI app to Kubernetes end to end.",`<p><b>In simple words:</b> Build images, push them to a registry, describe the app in YAML, apply it, and expose it through an Ingress.</p><ol><li>Write Dockerfiles (Next.js with <code>output: 'standalone'</code>, FastAPI with uvicorn) and build them in CI.</li><li>Push images to Azure Container Registry with a version tag (git SHA).</li><li>Create a namespace, ConfigMaps, and secrets from Key Vault (CSI driver).</li><li>Deployments for <code>web</code> and <code>api</code> with probes and resources; ClusterIP Services for each.</li><li>Run the DB migration as a Job; the database itself is Azure Database for PostgreSQL.</li><li>Ingress: <code>/</code> to web, <code>/api</code> to api, TLS from cert-manager.</li><li>HPA on both, PodDisruptionBudgets, NetworkPolicies.</li><li>CI/CD: GitHub Actions builds and pushes; Helm upgrade or Argo CD syncs; watch <code>kubectl rollout status</code>.</li></ol><pre><code>kubectl apply -f k8s/namespace.yaml
+kubectl apply -n app -f k8s/                     # deployments, services, ingress, hpa
+kubectl rollout status deploy/api -n app         # wait for healthy pods
+kubectl get ingress -n app                       # find the public address</code></pre>`],
 ["design","Mid","How would you scale a web application?",`<p>Stateless app servers behind a load balancer (scale horizontally), CDN for static assets, caching (Redis) for hot reads, database read replicas and indexing, queues for slow work, and later sharding or splitting services where there is a real bottleneck.</p>`],
 ["design","Mid","Caching strategies and invalidation?",`<p>Cache-aside (app reads cache, falls back to DB, then fills cache), write-through, write-behind. Invalidate by TTL, by explicit delete on write, or by versioned keys. Browser/CDN caching via <code>Cache-Control</code>, <code>ETag</code>. Watch for cache stampedes (use locks or stale-while-revalidate).</p>`],
 ["design","Mid","Monolith vs microservices?",`<p>Start with a well-structured modular monolith: simpler deploys, transactions and debugging. Split out services when teams or scaling needs differ; microservices add network failures, distributed data and ops overhead.</p>`],
